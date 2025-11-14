@@ -1,0 +1,81 @@
+# =============================
+# Python / Django
+# =============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.log
+*.pot
+*.mo
+*.sqlite3
+*.db
+
+# Virtual environments
+venv/
+.venv/
+
+# Django static & media (generated)
+staticfiles/
+media/
+static/
+
+# Django local settings
+local_settings.py
+
+# =============================
+# Node / React / Frontend
+# =============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+
+# Vite
+*.tsbuildinfo
+
+# =============================
+# macOS & system files
+# =============================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# =============================
+# Editors / IDE
+# =============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# JetBrains PyCharm
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# =============================
+# Environment variables
+# =============================
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# =============================
+# Git
+# =============================
+*.orig
+
+# =============================
+# Misc
+# =============================
+coverage/
