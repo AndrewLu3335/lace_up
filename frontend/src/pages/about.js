@@ -1,9 +1,8 @@
-import { Avatar, Box, Chip, Container, Grid, Typography, Stack, Divider } from '@mui/material';
+import { Avatar, Box, Chip, Container, Grid, Typography, Divider } from '@mui/material';
 import myphoto from '../assets/myphoto.jpg';
 
 export default function About() {
   return (
-    console.log(myphoto),
     <Container maxWidth="md" sx={{ py: 8 }}>
       {/* Avatar + Name */}
       <Box textAlign="center">

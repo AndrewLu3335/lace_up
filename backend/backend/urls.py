@@ -21,4 +21,5 @@ from django.urls import path,include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("runs.urls")),
+    path("api/strava/", include("strava.urls")),
 ]

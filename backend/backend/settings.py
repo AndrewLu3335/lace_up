@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'blog',
     'runs',
+    'strava',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+STRAVA_CLIENT_ID = "185559"
+STRAVA_CLIENT_SECRET = "59e049ace4f5ed88a7284d93967e8848684342c4"
+STRAVA_REDIRECT_URI = "http://localhost:8000/api/strava/callback/"
