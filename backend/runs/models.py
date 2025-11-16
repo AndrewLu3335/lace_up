@@ -8,9 +8,10 @@ class RunRecord(models.Model):
     @property
     def pace_min_per_km(self):
         if self.distance_km > 0:
-            return self.duration_minutes / self.distance_km
+            return round(self.duration_minutes / self.distance_km, 2)
         return None
     
+    strava_activity_id = models.BigIntegerField(unique=True, null=True, blank=True)
     avg_heart_rate = models.IntegerField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     weather = models.CharField(max_length=100, null=True, blank=True)

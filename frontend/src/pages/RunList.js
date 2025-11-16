@@ -27,7 +27,7 @@ function RunList() {
         <Card key={run.id} style={{ marginBottom: "20px" }}>
           <CardContent>
             <Typography variant="h6">
-              🗓️ {run.date}
+              🗓️ {run.date.replace("T", " ").replace("Z", "")}
             </Typography>
             <Typography>📏 Distance: {run.distance_km} km</Typography>
             <Typography>⏱️ Duration: {run.duration_minutes} min</Typography>
