@@ -8,6 +8,35 @@ from django.http import JsonResponse
 from django.utils import timezone
 from runs.models import RunRecord
 
+
+def decode_weather_code(code):
+    """
+    Decode the weather code into a human-readable description.
+
+    Args:
+        code (int): Weather code to decode
+
+    Returns:
+        str: Description of the weather code
+    """
+    mapping = {
+        0: "Clear sky",
+        1: "Mainly clear",
+        2: "Partly cloudy",
+        3: "Overcast",
+        45: "Fog",
+        48: "Rime fog",
+        51: "Light drizzle",
+        53: "Moderate drizzle",
+        55: "Dense drizzle",
+        61: "Light rain",
+        63: "Moderate rain",
+        65: "Heavy rain",
+        80: "Rain showers",
+        95: "Thunderstorm",
+    }
+    return mapping.get(code, "Unknown")
+
 def strava_connect(request):
     auth_url = (
         "https://www.strava.com/oauth/authorize"
@@ -93,13 +122,29 @@ def sync_strava_activities(request):
         duration_minutes = round(activity["moving_time"] / 60, 2)
         avg_hr = activity.get("average_heartrate")
         calories = activity.get("calories")
+        run_type = None
 
         # Convert UTC → Local timezone
         utc_time = datetime.fromisoformat(activity["start_date"][:-1])  # remove Z
         utc_time = utc_time.replace(tzinfo=pytz.UTC)
-        LOCAL_TZ = pytz.timezone("America/Toronto")
+        LOCAL_TZ = pytz.timezone(settings.LOCAL_TZ)
         local__start_time = utc_time.astimezone(LOCAL_TZ)
-
+        
+        latlng = activity.get("start_latlng")
+        
+        is_indoor = activity.get("trainer") == True or not latlng or len(latlng) != 2
+        if is_indoor:
+            run_type = "Treadmill Run"
+            weather = None
+            temperature = None
+        else: 
+            run_type = "Outdoor Run"
+            timestamp = int(local__start_time.timestamp())  
+            lat = latlng[0]
+            lon = latlng[1]
+            weather, temperature = get_weather_open_meteo(timestamp, lat, lon)
+            
+       
         RunRecord.objects.create(
             strava_activity_id=strava_id,
             distance_km=distance_km,
@@ -107,8 +152,44 @@ def sync_strava_activities(request):
             avg_heart_rate=avg_hr,
             calories=calories,
             date=local__start_time,
-            run_type="Outdoor Run",
+            run_type=run_type,
+            weather=weather,
+            temperature_c=temperature,
         )
         sync_count += 1
 
     return JsonResponse({"synced_activities": sync_count})
+
+def get_weather_open_meteo(timestamp, lat, lon):
+    try:
+        toronto_tz = pytz.timezone(settings.LOCAL_TZ)
+        dt_local = datetime.fromtimestamp(timestamp, toronto_tz)
+        date_str = dt_local.strftime("%Y-%m-%d")
+        hour_str = dt_local.strftime("%Y-%m-%dT%H:00")
+
+        url = (
+            f"https://archive-api.open-meteo.com/v1/archive?"
+            f"latitude={lat}&longitude={lon}"
+            f"&start_date={date_str}&end_date={date_str}"
+            f"&hourly=temperature_2m,weathercode"
+            f"&timezone={settings.LOCAL_TZ}"
+        )
+
+        response = requests.get(url).json()
+
+        if "hourly" not in response:
+            return None, None
+
+        times = response["hourly"]["time"]
+        temps = response["hourly"]["temperature_2m"]
+        codes = response["hourly"]["weathercode"]
+
+        if hour_str in times:
+            idx = times.index(hour_str)
+            return decode_weather_code(codes[idx]), temps[idx]
+
+        return None, None
+
+    except Exception as e:
+        print("Error:", e)
+        return None, None

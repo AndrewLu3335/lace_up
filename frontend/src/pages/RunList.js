@@ -1,52 +1,98 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Typography, Card, CardContent, Divider } from "@mui/material";
+import { List, Card, Tag, Space, Typography } from "antd";
+import {
+  EnvironmentOutlined,
+  ClockCircleOutlined,
+  FireOutlined,
+  HeartOutlined,
+  DashboardOutlined
+} from "@ant-design/icons";
 
-function RunList() {
+const { Title, Text } = Typography;
+
+export default function RunList() {
   const [runs, setRuns] = useState([]);
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/api/runs/")
-      .then(response => {
-        console.log("API Data:", response.data);
-        setRuns(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching runs:", error);
-      });
+      .then((res) => setRuns(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   return (
-    <Container maxWidth="md" style={{ paddingTop: "40px" }}>
-      <Typography variant="h4" gutterBottom>
-        My Running Records
-      </Typography>
-      <Divider style={{ marginBottom: "20px" }} />
+    <>
+      <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
+        🏃‍♂️ My Running Records
+      </Title>
 
-      {runs.map(run => (
-        <Card key={run.id} style={{ marginBottom: "20px" }}>
-          <CardContent>
-            <Typography variant="h6">
-              🗓️ {run.date.replace("T", " ").replace("Z", "")}
-            </Typography>
-            <Typography>📏 Distance: {run.distance_km} km</Typography>
-            <Typography>⏱️ Duration: {run.duration_minutes} min</Typography>
-            <Typography>⚡ Pace: {run.pace_min_per_km}</Typography>
+      <List
+        dataSource={runs}
+        renderItem={(run) => (
+          <Card
+            style={{
+              marginBottom: 18,
+              borderRadius: 14,
+              border: "1px solid #f0f0f0",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+            }}
+            title={
+              <Space size="large">
+                <Text strong style={{ fontSize: 16 }}>
+                  📅 {run.date.replace("T", " ").replace("Z", "")}
+                </Text>
 
-            {run.avg_heart_rate && (
-              <Typography>❤️ HR: {run.avg_heart_rate} bpm</Typography>
-            )}
+                <Tag
+                  color={run.run_type === "Outdoor Run" ? "orange" : "blue"}
+                  style={{ fontSize: 14, padding: "4px 10px" }}
+                >
+                  {run.run_type}
+                </Tag>
+              </Space>
+            }
+          >
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
 
-            {run.notes && (
-              <Typography style={{ marginTop: "10px" }}>
-                📝 {run.notes}
-              </Typography>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </Container>
+              {/* --- Main Data --- */}
+              <Space size="large" wrap>
+                <Text><DashboardOutlined /> {run.distance_km} km</Text>
+                <Text><ClockCircleOutlined /> {run.duration_minutes} min</Text>
+                {run.avg_heart_rate && <Text><HeartOutlined /> {run.avg_heart_rate} bpm</Text>}
+                {run.calories_burned && <Text><FireOutlined /> {run.calories_burned} kcal</Text>}
+              </Space>
+
+              {/* --- Weather and temperature (Outdoor only) --- */}
+              {run.run_type === "Outdoor Run" && (
+                <Space size="large">
+                  {run.weather && (
+                    <Tag color="cyan" style={{ padding: "4px 10px" }}>
+                      🌤 {run.weather}
+                    </Tag>
+                  )}
+                  {run.temperature_c && (
+                    <Tag color="orange" style={{ padding: "4px 10px" }}>
+                      🌡 {run.temperature_c}°C
+                    </Tag>
+                  )}
+
+                  {run.location && (
+                    <Text>
+                      <EnvironmentOutlined /> {run.location}
+                    </Text>
+                  )}
+                </Space>
+              )}
+
+              {/* --- Notes --- */}
+              {run.notes && (
+                <Text type="secondary">
+                  📝 {run.notes}
+                </Text>
+              )}
+            </Space>
+          </Card>
+        )}
+      />
+    </>
   );
 }
-
-export default RunList;
