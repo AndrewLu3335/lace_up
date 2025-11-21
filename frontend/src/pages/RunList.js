@@ -8,6 +8,7 @@ import {
   HeartOutlined,
   DashboardOutlined
 } from "@ant-design/icons";
+import RunStats from "./RunStats";
 
 const { Title, Text } = Typography;
 
@@ -22,6 +23,8 @@ export default function RunList() {
 
   return (
     <>
+      <RunStats runs={runs} />
+
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
       </Title>
