@@ -37,7 +37,7 @@ const RunStats = () => {
             .catch((err) => console.error(err));
     }, []);
 
-    const calculateStats = () => {
+    const calculateStats = (runs) => {
         if (!runs || runs.length === 0) {
             setStats({
                 total_distance: 0,
