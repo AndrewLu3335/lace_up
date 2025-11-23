@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { List, Card, Tag, Space, Typography } from "antd";
+import { List, Card, Tag, Space, Typography, Button } from "antd";
+import { BarChartOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import {
   EnvironmentOutlined,
   ClockCircleOutlined,
@@ -9,13 +11,13 @@ import {
   DashboardOutlined,
   ThunderboltOutlined
 } from "@ant-design/icons";
-import RunStats from "./RunStats";
 import RunHeatmap from "./RunHeatmap";
 
 const { Title, Text } = Typography;
 
 export default function RunList() {
   const [runs, setRuns] = useState([]);
+  const navigate = useNavigate();
 
   const formatPace = (minutes) => {
     if (!minutes) return "0:00";
@@ -34,12 +36,18 @@ export default function RunList() {
 
   return (
     <>
-      <RunStats runs={runs} />
       <RunHeatmap runs={runs} />
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
       </Title>
-
+      <Button
+        type="default"
+        size="large"
+        icon={<BarChartOutlined />}
+        onClick={() => navigate("/stats")}
+      >
+        View Statistics
+      </Button>
       <List
         dataSource={runs}
         renderItem={(run) => (
