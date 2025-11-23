@@ -143,6 +143,8 @@ def sync_strava_activities(request):
             lat = latlng[0]
             lon = latlng[1]
             weather, temperature = get_weather_open_meteo(timestamp, lat, lon)
+        
+        polyline = activity.get("map").get("summary_polyline")
             
        
         RunRecord.objects.create(
@@ -155,6 +157,7 @@ def sync_strava_activities(request):
             run_type=run_type,
             weather=weather,
             temperature_c=temperature,
+            polyline=polyline
         )
         sync_count += 1
 

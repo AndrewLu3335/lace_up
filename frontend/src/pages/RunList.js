@@ -6,14 +6,25 @@ import {
   ClockCircleOutlined,
   FireOutlined,
   HeartOutlined,
-  DashboardOutlined
+  DashboardOutlined,
+  ThunderboltOutlined
 } from "@ant-design/icons";
 import RunStats from "./RunStats";
+import RunHeatmap from "./RunHeatmap";
 
 const { Title, Text } = Typography;
 
 export default function RunList() {
   const [runs, setRuns] = useState([]);
+
+  const formatPace = (minutes) => {
+    if (!minutes) return "0:00";
+    const m = Math.floor(minutes);
+    const s = Math.round((minutes - m) * 60);
+    // format to 2 digits
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/api/runs/")
@@ -24,7 +35,7 @@ export default function RunList() {
   return (
     <>
       <RunStats runs={runs} />
-
+      <RunHeatmap runs={runs} />
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
       </Title>
@@ -60,6 +71,7 @@ export default function RunList() {
               <Space size="large" wrap>
                 <Text><DashboardOutlined /> {run.distance_km} km</Text>
                 <Text><ClockCircleOutlined /> {run.duration_minutes} min</Text>
+                <Text><ThunderboltOutlined /> {formatPace(run.pace_min_per_km)} min/km </Text>
                 {run.avg_heart_rate && <Text><HeartOutlined /> {run.avg_heart_rate} bpm</Text>}
                 {run.calories_burned && <Text><FireOutlined /> {run.calories_burned} kcal</Text>}
               </Space>
