@@ -37,6 +37,12 @@ const RunStats = () => {
             .catch((err) => console.error(err));
     }, []);
 
+    const formatPace = (minutes) => {
+        if (!minutes) return "0:00";
+        const m = Math.floor(minutes);
+        const s = Math.round((minutes - m) * 60);
+        return `${m}:${s < 10 ? "0" : ""}${s}`;
+    };
     const calculateStats = (runs) => {
         if (!runs || runs.length === 0) {
             setStats({
@@ -175,7 +181,7 @@ const RunStats = () => {
             </div>
 
             <div style={{ marginBottom: "40px" }}>
-                <Title level={3}>Running Statistics</Title>
+                {/* <Title level={3}>Running Statistics</Title> */}
 
                 {/* Summary Cards */}
                 <Row gutter={16} style={{ marginBottom: "24px" }}>
@@ -191,7 +197,10 @@ const RunStats = () => {
                     </Col>
                     <Col span={8}>
                         <Card>
-                            <Statistic title="Average Pace" value={stats.avg_pace} precision={2} suffix="min/km" />
+                            <Statistic
+                                title="Average Pace"
+                                value={formatPace(stats.avg_pace)}
+                                suffix="min/km" />
                         </Card>
                     </Col>
                 </Row>

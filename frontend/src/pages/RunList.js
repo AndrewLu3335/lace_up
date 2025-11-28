@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { List, Card, Tag, Space, Typography, Button } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
@@ -18,6 +18,7 @@ const { Title, Text } = Typography;
 export default function RunList() {
   const [runs, setRuns] = useState([]);
   const navigate = useNavigate();
+  const mapRef = useRef(null);
 
   const formatPace = (minutes) => {
     if (!minutes) return "0:00";
@@ -28,6 +29,8 @@ export default function RunList() {
   };
 
 
+  const [selectedRun, setSelectedRun] = useState(null);
+
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/api/runs/")
       .then((res) => setRuns(res.data))
@@ -36,7 +39,7 @@ export default function RunList() {
 
   return (
     <>
-      <RunHeatmap runs={runs} />
+      <RunHeatmap ref={mapRef} runs={runs} selectedRun={selectedRun} />
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
       </Title>
@@ -49,14 +52,29 @@ export default function RunList() {
         View Statistics
       </Button>
       <List
+        pagination={{
+          pageSize: 8,
+          align: "center",
+        }}
         dataSource={runs}
         renderItem={(run) => (
           <Card
+            hoverable
+            onClick={() => {
+              if (run.run_type !== "Treadmill Run") {
+                setSelectedRun(selectedRun?.id === run.id ? null : run);
+                // Scroll to map when a run is selected
+                if (selectedRun?.id !== run.id && mapRef.current) {
+                  mapRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }
+            }}
             style={{
               marginBottom: 18,
               borderRadius: 14,
-              border: "1px solid #f0f0f0",
+              border: selectedRun?.id === run.id ? "2px solid #FC4C02" : "1px solid #f0f0f0",
               boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              cursor: run.run_type === "Treadmill Run" ? "default" : "pointer",
             }}
             title={
               <Space size="large">
