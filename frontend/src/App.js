@@ -3,6 +3,7 @@ import About from "./pages/about";
 import AddRun from "./pages/AddRun";
 import RunList from "./pages/RunList";
 import RunStats from "./pages/RunStats";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/add-run" element={<AddRun />} />
         <Route path="/runs" element={<RunList />} />
         <Route path="/stats" element={<RunStats />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );

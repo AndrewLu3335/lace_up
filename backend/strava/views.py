@@ -69,7 +69,7 @@ def strava_callback(request):
         expires_at=response["expires_at"]
     )
 
-    return HttpResponse("Strava connected and tokens saved!")
+    return redirect("http://localhost:3000/runs")
 
 def refresh_strava_token():
     # Helper function to refresh the Strava access token if expired
