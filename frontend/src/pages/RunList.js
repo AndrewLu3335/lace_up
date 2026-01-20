@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { List, Card, Tag, Space, Typography, Button, message } from "antd";
+import { List, Card, Tag, Space, Typography, Button, message, Modal } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -10,17 +10,54 @@ import {
   HeartOutlined,
   DashboardOutlined,
   ThunderboltOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import RunHeatmap from "./RunHeatmap";
 
 const { Title, Text } = Typography;
 
 export default function RunList() {
+  const [syncing, setSyncing] = useState(false);
   const [runs, setRuns] = useState([]);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mapRef = useRef(null);
+  const [modal, contextHolder] = Modal.useModal();
+
+  const handleSync = () => {
+    setSyncing(true);
+
+    axios.post("http://127.0.0.1:8000/api/strava/sync/")
+      .then((res) => {
+        const count = res.data.synced_activities;
+
+        if (count > 0) {
+          modal.success({
+            title: 'Sync Complete',
+            content: `Successfully synced ${count} new activities!`,
+          });
+          axios.get("http://127.0.0.1:8000/api/runs/")
+            .then((res) => setRuns(res.data));
+        } else {
+          modal.info({
+            title: 'Sync Complete',
+            content: 'No new activities found.',
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Sync error caught:", err);
+        modal.error({
+          title: 'Sync Failed',
+          content: err.response?.data?.error || err.message,
+        });
+        setSyncing(false);
+      })
+      .finally(() => {
+        setSyncing(false);
+      });
+  };
 
   useEffect(() => {
     // Check if we just logged in
@@ -70,19 +107,32 @@ export default function RunList() {
 
   return (
     <>
+      {contextHolder}
       <RunHeatmap ref={mapRef} runs={runs} selectedRun={selectedRun} />
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
       </Title>
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Button
-          type="default"
-          size="large"
-          icon={<BarChartOutlined />}
-          onClick={() => navigate("/stats")}
-        >
-          View Statistics
-        </Button>
+        <Space>
+          <Button
+            type="default"
+            size="large"
+            icon={<BarChartOutlined />}
+            onClick={() => navigate("/stats")}
+          >
+            View Statistics
+          </Button>
+          <Button
+            type="primary"
+            size="large"
+            icon={<SyncOutlined spin={syncing} />}
+            onClick={handleSync}
+            loading={syncing}
+            style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+          >
+            Sync Activities
+          </Button>
+        </Space>
         <Button
           danger
           size="large"

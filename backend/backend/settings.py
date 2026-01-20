@@ -138,3 +138,7 @@ STRAVA_CLIENT_SECRET = "59e049ace4f5ed88a7284d93967e8848684342c4"
 STRAVA_REDIRECT_URI = "http://localhost:8000/api/strava/callback/"
 
 LOCAL_TZ = "America/Toronto"
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]

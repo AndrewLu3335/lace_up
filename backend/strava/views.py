@@ -4,6 +4,7 @@ import requests
 from django.conf import settings
 from django.shortcuts import redirect, HttpResponse
 from django.contrib.auth import logout
+from django.views.decorators.csrf import csrf_exempt
 from .models import StravaToken
 from django.http import JsonResponse
 from django.utils import timezone
@@ -167,6 +168,7 @@ def fetch_and_sync_activities(access_token):
     return sync_count
 
 
+@csrf_exempt
 def sync_strava_activities(request):
     access_token = refresh_strava_token()
     if not access_token:
@@ -210,6 +212,7 @@ def get_weather_open_meteo(timestamp, lat, lon):
         print("Error:", e)
         return None, None
 
+@csrf_exempt
 def strava_logout(request):
     logout(request)
     return HttpResponse("Logged out successfully")
