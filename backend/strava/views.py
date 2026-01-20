@@ -3,6 +3,7 @@ import pytz
 import requests
 from django.conf import settings
 from django.shortcuts import redirect, HttpResponse
+from django.contrib.auth import logout
 from .models import StravaToken
 from django.http import JsonResponse
 from django.utils import timezone
@@ -69,7 +70,7 @@ def strava_callback(request):
         expires_at=response["expires_at"]
     )
 
-    return redirect("http://localhost:3000/runs")
+    return redirect("http://localhost:3000/runs?login_success=1")
 
 def refresh_strava_token():
     # Helper function to refresh the Strava access token if expired
@@ -137,6 +138,7 @@ def sync_strava_activities(request):
             run_type = "Treadmill Run"
             weather = None
             temperature = None
+        # Todo: add other type of running
         else: 
             run_type = "Outdoor Run"
             timestamp = int(local__start_time.timestamp())  
@@ -193,6 +195,11 @@ def get_weather_open_meteo(timestamp, lat, lon):
 
         return None, None
 
+        return None, None
     except Exception as e:
         print("Error:", e)
         return None, None
+
+def strava_logout(request):
+    logout(request)
+    return HttpResponse("Logged out successfully")

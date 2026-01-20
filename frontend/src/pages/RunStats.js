@@ -2,7 +2,8 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Typography, Spin, Select, Button } from "antd";
+import { Card, Col, Row, Statistic, Typography, Spin, Select, Button, Space } from "antd";
+import { LogoutOutlined } from "@ant-design/icons";
 import {
     LineChart,
     Line,
@@ -22,6 +23,19 @@ const RunStats = () => {
     const [stats, setStats] = useState(null);
     const [runs, setRuns] = useState([]);
     const navigate = useNavigate(); // for navigation
+
+    const handleLogout = () => {
+        axios.post("http://127.0.0.1:8000/api/strava/logout/")
+            .then(() => {
+                localStorage.removeItem('isAuthenticated');
+                navigate("/login");
+            })
+            .catch((err) => {
+                console.error("Logout failed:", err);
+                localStorage.removeItem('isAuthenticated');
+                navigate("/login");
+            });
+    };
 
     const [timeUnit, setTimeUnit] = useState("weekly");
     const [timeRange, setTimeRange] = useState(12);
@@ -175,9 +189,14 @@ const RunStats = () => {
         <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}> {/* 加点容器样式 */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
                 <Title level={2} style={{ margin: 0 }}>Running Statistics</Title>
-                <Button type="primary" size="large" onClick={() => navigate("/runs")}>
-                    View All Records and heatmap →
-                </Button>
+                <Space>
+                    <Button type="primary" size="large" onClick={() => navigate("/runs")}>
+                        View All Records and heatmap →
+                    </Button>
+                    <Button danger size="large" icon={<LogoutOutlined />} onClick={handleLogout}>
+                        Logout
+                    </Button>
+                </Space>
             </div>
 
             <div style={{ marginBottom: "40px" }}>

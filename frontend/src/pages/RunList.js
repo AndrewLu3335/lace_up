@@ -2,14 +2,15 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { List, Card, Tag, Space, Typography, Button } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   EnvironmentOutlined,
   ClockCircleOutlined,
   FireOutlined,
   HeartOutlined,
   DashboardOutlined,
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  LogoutOutlined
 } from "@ant-design/icons";
 import RunHeatmap from "./RunHeatmap";
 
@@ -18,7 +19,31 @@ const { Title, Text } = Typography;
 export default function RunList() {
   const [runs, setRuns] = useState([]);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const mapRef = useRef(null);
+
+  useEffect(() => {
+    // Check if we just logged in
+    if (searchParams.get('login_success') === '1') {
+      localStorage.setItem('isAuthenticated', 'true');
+      // Optional: clean URL
+      navigate('/runs', { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  const handleLogout = () => {
+    // Call backend to destroy session
+    axios.post("http://127.0.0.1:8000/api/strava/logout/")
+      .then(() => {
+        localStorage.removeItem('isAuthenticated');
+        navigate("/login");
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+        localStorage.removeItem('isAuthenticated');
+        navigate("/login");
+      });
+  };
 
   const formatPace = (minutes) => {
     if (!minutes) return "0:00";
@@ -43,14 +68,26 @@ export default function RunList() {
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
       </Title>
-      <Button
-        type="default"
-        size="large"
-        icon={<BarChartOutlined />}
-        onClick={() => navigate("/stats")}
-      >
-        View Statistics
-      </Button>
+      <div style={{ marginBottom: 16 }}>
+        <Space>
+          <Button
+            type="default"
+            size="large"
+            icon={<BarChartOutlined />}
+            onClick={() => navigate("/stats")}
+          >
+            View Statistics
+          </Button>
+          <Button
+            danger
+            size="large"
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </Space>
+      </div>
       <List
         pagination={{
           pageSize: 8,
