@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { List, Card, Tag, Space, Typography, Button } from "antd";
+import { List, Card, Tag, Space, Typography, Button, message } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -26,7 +26,13 @@ export default function RunList() {
     // Check if we just logged in
     if (searchParams.get('login_success') === '1') {
       localStorage.setItem('isAuthenticated', 'true');
-      // Optional: clean URL
+
+      const syncedCount = searchParams.get('synced');
+      if (syncedCount) {
+        message.success(`Successfully synced ${syncedCount} new activities!`);
+      }
+
+      // Clean URL
       navigate('/runs', { replace: true });
     }
   }, [searchParams, navigate]);
@@ -68,25 +74,23 @@ export default function RunList() {
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
       </Title>
-      <div style={{ marginBottom: 16 }}>
-        <Space>
-          <Button
-            type="default"
-            size="large"
-            icon={<BarChartOutlined />}
-            onClick={() => navigate("/stats")}
-          >
-            View Statistics
-          </Button>
-          <Button
-            danger
-            size="large"
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
-        </Space>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Button
+          type="default"
+          size="large"
+          icon={<BarChartOutlined />}
+          onClick={() => navigate("/stats")}
+        >
+          View Statistics
+        </Button>
+        <Button
+          danger
+          size="large"
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
       </div>
       <List
         pagination={{

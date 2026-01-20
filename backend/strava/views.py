@@ -50,6 +50,9 @@ def strava_connect(request):
     return redirect(auth_url)
 
 def strava_callback(request):
+    '''
+    Handle the callback from Strava after authorization.
+    '''
     code = request.GET.get("code")
     if not code:
         return HttpResponse("No code received")
@@ -69,8 +72,10 @@ def strava_callback(request):
         refresh_token=response["refresh_token"],
         expires_at=response["expires_at"]
     )
+    # after login, fetch and sync activities
+    sync_count = fetch_and_sync_activities(response["access_token"])
 
-    return redirect("http://localhost:3000/runs?login_success=1")
+    return redirect(f"http://localhost:3000/runs?login_success=1&synced={sync_count}")
 
 def refresh_strava_token():
     # Helper function to refresh the Strava access token if expired
@@ -95,13 +100,10 @@ def refresh_strava_token():
 
     return token_obj.access_token
 
-def sync_strava_activities(request):
-    access_token = refresh_strava_token()
-    if not access_token:
-        return JsonResponse({"error": "Strava not connected"}, status=400)
-    # Fetch activities from Strava 
+def fetch_and_sync_activities(access_token):
+     # Fetch activities from Strava 
     # per_page: number of activities to fetch
-    url = "https://www.strava.com/api/v3/athlete/activities?per_page=20&page=1"
+    url = "https://www.strava.com/api/v3/athlete/activities?per_page=50&page=1"
     headers = {"Authorization": f"Bearer {access_token}"}
 
     response = requests.get(url, headers=headers)
@@ -162,8 +164,16 @@ def sync_strava_activities(request):
             polyline=polyline
         )
         sync_count += 1
+    return sync_count
 
-    return JsonResponse({"synced_activities": sync_count})
+
+def sync_strava_activities(request):
+    access_token = refresh_strava_token()
+    if not access_token:
+        return JsonResponse({"error": "Strava not connected"}, status=400)
+    sync_count = fetch_and_sync_activities(access_token)
+    return JsonResponse({"synced_activities": sync_count}, status=200)
+   
 
 def get_weather_open_meteo(timestamp, lat, lon):
     try:
