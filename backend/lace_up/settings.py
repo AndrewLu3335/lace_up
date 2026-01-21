@@ -141,7 +141,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 STRAVA_CLIENT_ID = "185559"
 STRAVA_CLIENT_SECRET = "59e049ace4f5ed88a7284d93967e8848684342c4"
-STRAVA_REDIRECT_URI = "http://localhost:8000/api/strava/callback/"
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
+STRAVA_REDIRECT_URI = f"{BACKEND_URL}/api/strava/callback/"
 
 LOCAL_TZ = "America/Toronto"
 
@@ -149,3 +150,5 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://16.52.72.194",
 ]
+
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')

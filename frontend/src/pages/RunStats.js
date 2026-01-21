@@ -25,7 +25,7 @@ const RunStats = () => {
     const navigate = useNavigate(); // for navigation
 
     const handleLogout = () => {
-        axios.post("http://127.0.0.1:8000/api/strava/logout/")
+        axios.post(`${process.env.REACT_APP_API_URL}/api/strava/logout/`)
             .then(() => {
                 localStorage.removeItem('isAuthenticated');
                 navigate("/login");
@@ -43,7 +43,7 @@ const RunStats = () => {
     const [paceRange, setPaceRange] = useState(20); //default pace range is 20 runs
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/api/runs/")
+        axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
             .then((res) => {
                 setRuns(res.data);
                 calculateStats(res.data);

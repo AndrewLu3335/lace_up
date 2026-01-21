@@ -76,7 +76,7 @@ def strava_callback(request):
     # after login, fetch and sync activities
     sync_count = fetch_and_sync_activities(response["access_token"])
 
-    return redirect(f"http://localhost:3000/runs?login_success=1&synced={sync_count}")
+    return redirect(f"{settings.FRONTEND_URL}/runs?login_success=1&synced={sync_count}")
 
 def refresh_strava_token():
     # Helper function to refresh the Strava access token if expired
