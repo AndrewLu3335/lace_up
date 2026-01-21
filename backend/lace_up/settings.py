@@ -147,4 +147,5 @@ LOCAL_TZ = "America/Toronto"
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://16.52.72.194",
 ]
