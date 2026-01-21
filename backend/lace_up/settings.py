@@ -150,5 +150,3 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://16.52.72.194",
 ]
-
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
