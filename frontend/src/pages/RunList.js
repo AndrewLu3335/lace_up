@@ -28,7 +28,7 @@ export default function RunList() {
   const handleSync = () => {
     setSyncing(true);
 
-    axios.post("http://127.0.0.1:8000/api/strava/sync/")
+    axios.post(`${process.env.REACT_APP_API_URL}/api/strava/sync/`)
       .then((res) => {
         const count = res.data.synced_activities;
 
@@ -37,7 +37,7 @@ export default function RunList() {
             title: 'Sync Complete',
             content: `Successfully synced ${count} new activities!`,
           });
-          axios.get("http://127.0.0.1:8000/api/runs/")
+          axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
             .then((res) => setRuns(res.data));
         } else {
           modal.info({
@@ -76,7 +76,7 @@ export default function RunList() {
 
   const handleLogout = () => {
     // Call backend to destroy session
-    axios.post("http://127.0.0.1:8000/api/strava/logout/")
+    axios.post(`${process.env.REACT_APP_API_URL}/api/strava/logout/`)
       .then(() => {
         localStorage.removeItem('isAuthenticated');
         navigate("/login");
@@ -100,7 +100,7 @@ export default function RunList() {
   const [selectedRun, setSelectedRun] = useState(null);
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/runs/")
+    axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
       .then((res) => setRuns(res.data))
       .catch((err) => console.error(err));
   }, []);

@@ -6,7 +6,7 @@ const { Title, Text } = Typography;
 
 const Login = () => {
     const handleLogin = () => {
-        window.location.href = "http://localhost:8000/api/strava/connect/";
+        window.location.href = `${process.env.REACT_APP_API_URL}/api/strava/connect/`;
     };
     return (
         <div style={{

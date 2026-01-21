@@ -27,7 +27,7 @@ function AddRun() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    axios.post("http://127.0.0.1:8000/api/runs/", formData)
+    axios.post(`${process.env.REACT_APP_API_URL}/api/runs/`, formData)
       .then(() => {
         alert("Run added!");
       })
