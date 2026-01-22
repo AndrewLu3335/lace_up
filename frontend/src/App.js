@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import About from "./pages/about";
 import AddRun from "./pages/AddRun";
 import RunList from "./pages/RunList";
 import RunStats from "./pages/RunStats";
@@ -11,7 +10,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/about" element={<About />} />
         <Route element={<PrivateRoute />}>
           <Route path="/add-run" element={<AddRun />} />
           <Route path="/runs" element={<RunList />} />

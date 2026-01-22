@@ -158,4 +158,4 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.laceuprun.com",
 ]
 
-FRONTEND_URL = "https://laceuprun.com"
+

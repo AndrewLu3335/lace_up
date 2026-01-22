@@ -14,6 +14,7 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import RunHeatmap from "./RunHeatmap";
+import StravaFooter from "./StravaFooter";
 
 const { Title, Text } = Typography;
 
@@ -225,6 +226,7 @@ export default function RunList() {
           </Card>
         )}
       />
+      <StravaFooter />
     </>
   );
 }
