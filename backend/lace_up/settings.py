@@ -139,17 +139,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-STRAVA_CLIENT_ID = "185559"
-STRAVA_CLIENT_SECRET = "59e049ace4f5ed88a7284d93967e8848684342c4"
+LOCAL_TZ = "America/Toronto"
+
+
+STRAVA_CLIENT_ID = os.getenv('STRAVA_CLIENT_ID')
+STRAVA_CLIENT_SECRET = os.getenv('STRAVA_CLIENT_SECRET')
+
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
 STRAVA_REDIRECT_URI = f"{BACKEND_URL}/api/strava/callback/"
 
-LOCAL_TZ = "America/Toronto"
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://16.52.72.194",
     'https://laceuprun.com',
+    "https://www.laceuprun.com",
 ]
 
-FRONTEND_URL = "http://16.52.72.194"
+FRONTEND_URL = "https://laceuprun.com"
