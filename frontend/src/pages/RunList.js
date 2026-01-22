@@ -97,6 +97,19 @@ export default function RunList() {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
+  const formatRunTime = (dateString) => {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+  };
 
   const [selectedRun, setSelectedRun] = useState(null);
 
@@ -171,7 +184,7 @@ export default function RunList() {
             title={
               <Space size="large">
                 <Text strong style={{ fontSize: 16 }}>
-                  📅 {run.date.replace("T", " ").replace("Z", "")}
+                  📅 {formatRunTime(run.date)}
                 </Text>
 
                 <Tag

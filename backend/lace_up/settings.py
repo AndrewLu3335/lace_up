@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'rest_framework',
     'corsheaders',
-    'blog',
     'runs',
     'strava',
 ]
@@ -139,17 +138,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-LOCAL_TZ = "America/Toronto"
 
+
+
+LOCAL_TZ = "America/Toronto"
 
 STRAVA_CLIENT_ID = os.getenv('STRAVA_CLIENT_ID')
 STRAVA_CLIENT_SECRET = os.getenv('STRAVA_CLIENT_SECRET')
+
 
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
 STRAVA_REDIRECT_URI = f"{BACKEND_URL}/api/strava/callback/"
 
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",

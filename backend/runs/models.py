@@ -1,9 +1,11 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class RunRecord(models.Model):
     date = models.DateTimeField()
     distance_km = models.FloatField()
     duration_minutes = models.FloatField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='runs')
 
     @property
     def pace_min_per_km(self):
