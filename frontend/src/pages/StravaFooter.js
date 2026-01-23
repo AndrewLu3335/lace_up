@@ -18,9 +18,9 @@ const StravaFooter = () => {
                 alt="Powered by Strava"
                 style={{ height: '32px', opacity: 0.8, marginBottom: '8px' }}
             />
-            <div style={{ fontSize: '12px' }}>
+            {/* <div style={{ fontSize: '12px' }}>
                 Data provided by Strava API
-            </div>
+            </div> */}
         </footer>
     );
 };
