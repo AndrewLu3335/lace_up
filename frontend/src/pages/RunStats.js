@@ -16,7 +16,7 @@ import {
     BarChart,
     Bar,
 } from "recharts";
-import StravaFooter from "./StravaFooter";
+import StravaFooter from "../components/StravaFooter";
 
 const { Title } = Typography;
 

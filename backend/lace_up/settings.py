@@ -136,9 +136,19 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://laceuprun.com",
+    "https://www.laceuprun.com",
+]
+
+SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
 
 
 LOCAL_TZ = "America/Toronto"
@@ -159,4 +169,13 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.laceuprun.com",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
 

@@ -14,49 +14,78 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import RunHeatmap from "./RunHeatmap";
-import StravaFooter from "./StravaFooter";
+import StravaFooter from "../components/StravaFooter";
+import LoadingScreen from "../components/LoadingScreen.js";
 
 const { Title, Text } = Typography;
 
 export default function RunList() {
   const [syncing, setSyncing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showGlobalLoading, setShowGlobalLoading] = useState(false);
   const [runs, setRuns] = useState([]);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mapRef = useRef(null);
   const [modal, contextHolder] = Modal.useModal();
+  const loadingTimerRef = useRef(null);
 
-  const handleSync = () => {
+  const handleSync = (is_auto = false) => {
+    console.log("Syncing data....");
     setSyncing(true);
+    // if is_auto is true, show global loading for 100ms
+    if (is_auto) {
+      setShowGlobalLoading(true);
+      loadingTimerRef.current = setTimeout(() => {
+        setShowGlobalLoading(false);
+      }, 100);
+    }
 
-    axios.post(`${process.env.REACT_APP_API_URL}/api/strava/sync/`)
+    axios.post(`${process.env.REACT_APP_API_URL}/api/strava/sync/`, {})
       .then((res) => {
         const count = res.data.synced_activities;
 
-        if (count > 0) {
-          modal.success({
-            title: 'Sync Complete',
-            content: `Successfully synced ${count} new activities!`,
-          });
+        if (!is_auto) {
+          if (count > 0) {
+            modal.success({
+              title: 'Sync Complete',
+              content: `Successfully synced ${count} new activities!`,
+            });
+          } else {
+            modal.info({
+              title: 'Sync Complete',
+              content: 'No new activities found.',
+            });
+          }
+        } else if (count > 0) {
+          // auto sync, usually for login redirect
+          message.success(`Successfully synced ${count} new activities!`);
+        }
+
+        if (count > 0 || is_auto) {
           axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
-            .then((res) => setRuns(res.data));
-        } else {
-          modal.info({
-            title: 'Sync Complete',
-            content: 'No new activities found.',
-          });
+            .then((res) => setRuns(res.data))
+            .catch((err) => console.error(err));
         }
       })
       .catch((err) => {
         console.error("Sync error caught:", err);
-        modal.error({
-          title: 'Sync Failed',
-          content: err.response?.data?.error || err.message,
-        });
-        setSyncing(false);
+        if (!is_auto) {
+          modal.error({
+            title: 'Sync Failed',
+            content: err.response?.data?.error || err.message,
+          });
+        } else {
+          message.error("Auto-sync failed, please try again later.");
+        }
       })
       .finally(() => {
+        if (loadingTimerRef.current) {
+          clearTimeout(loadingTimerRef.current);
+          loadingTimerRef.current = null;
+        }
         setSyncing(false);
+        setShowGlobalLoading(false);
       });
   };
 
@@ -64,12 +93,8 @@ export default function RunList() {
     // Check if we just logged in
     if (searchParams.get('login_success') === '1') {
       localStorage.setItem('isAuthenticated', 'true');
-
-      const syncedCount = searchParams.get('synced');
-      if (syncedCount) {
-        message.success(`Successfully synced ${syncedCount} new activities!`);
-      }
-
+      // Auto sync
+      handleSync(true);
       // Clean URL
       navigate('/runs', { replace: true });
     }
@@ -122,6 +147,7 @@ export default function RunList() {
   return (
     <>
       {contextHolder}
+      {showGlobalLoading && <LoadingScreen />}
       <RunHeatmap ref={mapRef} runs={runs} selectedRun={selectedRun} />
       <Title level={2} style={{ color: "#FC4C02", fontWeight: 700, marginBottom: 24 }}>
         🏃‍♂️ My Running Records
@@ -140,7 +166,7 @@ export default function RunList() {
             type="primary"
             size="large"
             icon={<SyncOutlined spin={syncing} />}
-            onClick={handleSync}
+            onClick={() => handleSync(false)}
             loading={syncing}
             style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
           >

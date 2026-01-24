@@ -2,6 +2,7 @@ import json
 import os
 import pytz
 import requests
+import time
 from datetime import datetime
 from django.conf import settings
 from django.shortcuts import redirect, HttpResponse
@@ -12,7 +13,13 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.utils import timezone
 from runs.models import RunRecord
 from .models import StravaProfile 
+from rest_framework.decorators import api_view, permission_classes,authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  
 
 def decode_weather_code(code):
     '''
@@ -134,7 +141,7 @@ def strava_callback(request):
         # Check if Django User already exists (rare, but prevent just in case)
         user, created = User.objects.get_or_create(username=new_username)
         
-        # 创建 Profile 绑定
+        # Create StravaProfile
         profile = StravaProfile.objects.create(
             user=user,
             strava_id=strava_id,
@@ -150,10 +157,10 @@ def strava_callback(request):
     login(request, user)
 
     # 5. Sync activities after login
-    sync_count = fetch_and_sync_activities(user, access_token)
+    # sync_count = fetch_and_sync_activities(user, access_token)
 
     # 6. Redirect back to frontend (with parameters)
-    return redirect(f"{settings.FRONTEND_URL}/runs?login_success=1&synced={sync_count}")
+    return redirect(f"{settings.FRONTEND_URL}/runs?login_success=1&synced=0")
 
 
 def refresh_strava_token(user):
@@ -166,19 +173,25 @@ def refresh_strava_token(user):
         return None
 
     # If token expires within 60 seconds, refresh it
-        response = requests.post(
-            "https://www.strava.com/oauth/token", data={
-                "client_id": settings.STRAVA_CLIENT_ID,
-                "client_secret": settings.STRAVA_CLIENT_SECRET,
-                "grant_type": "refresh_token",
-                "refresh_token": profile.refresh_token,
-            }
-        ).json()
+    if profile.expires_at and time.time() < profile.expires_at - 60:
+        return profile.access_token  # not expired, return current token
+    response = requests.post(
+        "https://www.strava.com/oauth/token", data={
+            "client_id": settings.STRAVA_CLIENT_ID,
+            "client_secret": settings.STRAVA_CLIENT_SECRET,
+            "grant_type": "refresh_token",
+            "refresh_token": profile.refresh_token,
+        }
+    ).json()
 
-        profile.access_token = response["access_token"]
-        profile.refresh_token = response["refresh_token"]
-        profile.expires_at = response["expires_at"]
-        profile.save()
+    if 'access_token' not in response:
+        print(f"Error refreshing token: {response}")
+        return None
+    
+    profile.access_token = response["access_token"]
+    profile.refresh_token = response["refresh_token"]
+    profile.expires_at = response["expires_at"]
+    profile.save()
 
     return profile.access_token
 
@@ -266,6 +279,9 @@ def fetch_and_sync_activities(user, access_token):
 
 
 @csrf_exempt
+@api_view(['POST'])
+@authentication_classes([CsrfExemptSessionAuthentication]) 
+@permission_classes([IsAuthenticated])
 def sync_strava_activities(request):
     '''
     User trigger sync strava activities
