@@ -1,7 +1,11 @@
 import React from 'react';
 import Logo from '../assets/laceup_logo.png';
 
-const LoadingScreen = () => {
+const LoadingScreen = ({ show = true, message = "Syncing your activities from Strava..." }) => {
+  if (!show) {
+    return null;
+  }
+
   return (
     <div style={styles.overlay}>
       <div style={styles.container}>
@@ -11,7 +15,7 @@ const LoadingScreen = () => {
           alt="Loading..."
           className="loading-logo"
         />
-        <p style={styles.text}>Syncing your runs...</p>
+        <p style={styles.text}>{message}</p>
       </div>
 
       <style>{`

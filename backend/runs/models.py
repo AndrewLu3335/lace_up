@@ -28,6 +28,20 @@ class RunRecord(models.Model):
     calories = models.IntegerField(null=True, blank=True)
     temperature_c = models.FloatField(null=True, blank=True)
     polyline = models.TextField(null=True, blank=True)
+    
+    # Weather update status
+    WEATHER_STATUS_CHOICES = [
+        ('pending', 'Pending'),  # 未更新
+        ('updating', 'Updating'),  # 更新中
+        ('completed', 'Completed'),  # 已完成
+        ('failed', 'Failed'),  # 失败
+    ]
+    weather_status = models.CharField(
+        max_length=20, 
+        choices=WEATHER_STATUS_CHOICES, 
+        default='pending',
+        help_text='Weather data update status'
+    )
 
     def __str__(self):
         return f"Run on {self.date.strftime('%Y-%m-%d')} - {self.distance_km} km in {self.duration_minutes} min"
