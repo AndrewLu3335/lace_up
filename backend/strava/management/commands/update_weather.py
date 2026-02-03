@@ -36,7 +36,6 @@ class Command(BaseCommand):
         self.stdout.write(f'[{timezone.now().isoformat()}] Starting weather data update...')
 
         if user_id:
-            from django.contrib.auth.models import User
             try:
                 users = [User.objects.get(id=user_id)]
             except User.DoesNotExist:

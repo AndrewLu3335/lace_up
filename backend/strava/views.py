@@ -383,12 +383,13 @@ def _process_activities_page(user, activities, skip_weather=True, sync_count_so_
             logger.warning(f"Failed to extract data for activity {strava_activity_id}: {e}", exc_info=True)
             continue
 
-    # 3. Bulk create records
+    # 3. Bulk create records (bulk_create expects model instances, not dicts)
     sync_count = 0
     if records_to_create:
         try:
-            RunRecord.objects.bulk_create(records_to_create, ignore_conflicts=True)
-            sync_count = len(records_to_create)
+            instances = [RunRecord(**r) for r in records_to_create]
+            RunRecord.objects.bulk_create(instances, ignore_conflicts=True)
+            sync_count = len(instances)
         except Exception as e:
             logger.error(f"Error bulk creating run records: {e}", exc_info=True)
             # Fallback to individual creates

@@ -227,9 +227,17 @@ export default function RunList() {
     }
   }, [shouldShowLoading]);
 
-  // Auto sync activities polling - check for new activities every 5 minutes
+  // Auto sync activities polling - check for new activities every 5 minutes.
+  // Always refetch runs after sync so we show data synced by cron (server-side) too.
   useEffect(() => {
-    // Start polling for new activities
+    const refetchRuns = () => {
+      axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
+        .then((res) => {
+          setRuns(res.data);
+          _checkAndStartWeatherPolling(res.data);
+        })
+        .catch((err) => console.error("Error fetching runs:", err));
+    };
     const interval = setInterval(() => {
       console.log("Auto-checking for new activities...");
       axios.post(`${process.env.REACT_APP_API_URL}/api/strava/sync/`, { fast_mode: false }, {
@@ -239,17 +247,13 @@ export default function RunList() {
         const count = res.data.synced_activities;
         if (count > 0) {
           console.log(`Auto-synced ${count} new activities`);
-          // Refresh runs data
-          axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
-            .then((res) => {
-              setRuns(res.data);
-              _checkAndStartWeatherPolling(res.data);
-            })
-            .catch((err) => console.error("Error fetching runs:", err));
         }
+        // Always refetch runs so we show data synced by cron (or by this request)
+        refetchRuns();
       })
       .catch((err) => {
         console.error("Error auto-syncing activities:", err);
+        refetchRuns();
       });
     }, 300000); // Poll every 5 minutes (300000 ms)
     
