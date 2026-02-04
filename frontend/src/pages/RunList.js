@@ -31,6 +31,7 @@ export default function RunList() {
   const [searchParams] = useSearchParams();
   const mapRef = useRef(null);
   const [modal, contextHolder] = Modal.useModal();
+  const [showHintAfterLogin, setShowHintAfterLogin] = useState(false);
 
   // Check if there are records with pending weather updates and start polling
   const _checkAndStartWeatherPolling = useCallback((runsData) => {
@@ -159,6 +160,7 @@ export default function RunList() {
     if (loginSuccess && !hasHandledLogin.current) {
       console.log("Login success detected, starting auto sync");
       hasHandledLogin.current = true;
+      setShowHintAfterLogin(true);
       localStorage.setItem('isAuthenticated', 'true');
       
       // Start sync immediately, before navigating
@@ -297,12 +299,12 @@ export default function RunList() {
       </Title>
 
       {/* Data & weather update hint — closable, shown when records/weather are updating in background */}
-      {showUpdateHint && !updateHintDismissed && (
+      {(showUpdateHint || showHintAfterLogin) && !updateHintDismissed &&  (
         <Alert
           type="info"
           showIcon
           closable
-          onClose={() => setUpdateHintDismissed(true)}
+          onClose={() => { setUpdateHintDismissed(true); setShowHintAfterLogin(false); }}
           message="Data & weather update"
           description="Running records and weather data are updated in the background. New activities and outdoor run conditions will appear shortly."
           style={{ marginBottom: 16 }}
