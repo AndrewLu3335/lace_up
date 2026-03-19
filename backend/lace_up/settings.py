@@ -155,7 +155,8 @@ LOCAL_TZ = "America/Toronto"
 
 STRAVA_CLIENT_ID = os.getenv('STRAVA_CLIENT_ID')
 STRAVA_CLIENT_SECRET = os.getenv('STRAVA_CLIENT_SECRET')
-STRAVA_WEBHOOK_VERIFY_TOKEN = os.getenv('STRAVA_WEBHOOK_VERIFY_TOKEN', 'LACEUP_SECRET_TOKEN_2026')
+# Set in .env for production; required for Strava webhook subscription verification
+STRAVA_WEBHOOK_VERIFY_TOKEN = os.getenv('STRAVA_WEBHOOK_VERIFY_TOKEN')
 
 
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
@@ -165,8 +166,8 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "http://16.52.72.194",
-    'https://laceuprun.com',
+    "http://127.0.0.1:3000",
+    "https://laceuprun.com",
     "https://www.laceuprun.com",
 ]
 

@@ -15,6 +15,25 @@ class RunRecord(models.Model):
     
     strava_activity_id = models.BigIntegerField(unique=True, null=True, blank=True)
     avg_heart_rate = models.IntegerField(null=True, blank=True)
+    max_heart_rate = models.IntegerField(null=True, blank=True)
+    # Strava: average_cadence (running: typically total steps per minute)
+    average_cadence_spm = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Average cadence, total steps/min (both feet); sync normalizes Strava Run summary",
+    )
+    # Estimated when cadence + distance + moving_time available
+    stride_length_m = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Estimated average stride length (meters)",
+    )
+    # Strava max_speed is m/s
+    max_speed_m_s = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Max speed (m/s) from Strava",
+    )
     notes = models.TextField(null=True, blank=True)
     weather = models.CharField(max_length=100, null=True, blank=True)
     location = models.CharField(max_length=100, null=True, blank=True)
@@ -31,10 +50,10 @@ class RunRecord(models.Model):
     
     # Weather update status
     WEATHER_STATUS_CHOICES = [
-        ('pending', 'Pending'),  # 未更新
-        ('updating', 'Updating'),  # 更新中
-        ('completed', 'Completed'),  # 已完成
-        ('failed', 'Failed'),  # 失败
+        ('pending', 'Pending'),  # Not updated
+        ('updating', 'Updating'),  # Updating
+        ('completed', 'Completed'),  # Completed
+        ('failed', 'Failed'),  # Failed
     ]
     weather_status = models.CharField(
         max_length=20, 

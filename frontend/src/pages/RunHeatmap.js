@@ -23,9 +23,10 @@ const MapUpdater = ({ selectedRun }) => {
 };
 
 const RunHeatmap = forwardRef(({ runs, selectedRun }, ref) => {
+    // Always show all routes that have polylines. If we only kept selectedRun's polyline,
+    // selecting a treadmill run (usually no polyline) would leave zero polylines and hide the map.
     const polylines = runs
         .filter((run) => run.polyline)
-        .filter((run) => !selectedRun || run.id === selectedRun.id) // Filter if selectedRun is present
         .map((run) => {
             try {
                 return {

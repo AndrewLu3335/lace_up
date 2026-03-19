@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import axios from "axios";
-import { List, Card, Tag, Space, Typography, Button, message, Modal, Tooltip, Alert } from "antd";
+import { List, Card, Tag, Space, Typography, Button, message, Modal, Alert, Descriptions } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -341,8 +341,9 @@ export default function RunList() {
           <Card
             hoverable
             onClick={() => {
+              setSelectedRun(selectedRun?.id === run.id ? null : run);
+
               if (run.run_type !== "treadmill") {
-                setSelectedRun(selectedRun?.id === run.id ? null : run);
                 // Scroll to map when a run is selected
                 if (selectedRun?.id !== run.id && mapRef.current) {
                   mapRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -354,7 +355,7 @@ export default function RunList() {
               borderRadius: 14,
               border: selectedRun?.id === run.id ? "2px solid #FC4C02" : "1px solid #f0f0f0",
               boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-              cursor: run.run_type === "treadmill" ? "default" : "pointer",
+              cursor: "pointer",
             }}
             title={
               <Space size="large">
@@ -423,6 +424,107 @@ export default function RunList() {
                 </Text>
               )}
             </Space>
+
+            {/* Expand in-place under this card when selected */}
+            {selectedRun?.id === run.id && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  marginTop: 16,
+                  padding: "16px",
+                  background: "#fafafa",
+                  borderRadius: 10,
+                  borderTop: "1px solid #f0f0f0",
+                }}
+              >
+                <Text strong style={{ display: "block", marginBottom: 12 }}>
+                  Activity details
+                </Text>
+                <Descriptions
+                  bordered
+                  size="small"
+                  column={{ xs: 1, sm: 1, md: 1 }}
+                  styles={{ label: { width: 160 } }}
+                >
+                  <Descriptions.Item label="Date">
+                    {formatRunTime(run.date)}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Type">
+                    {run.run_type === "outdoor"
+                      ? "Outdoor Run"
+                      : run.run_type === "treadmill"
+                        ? "Treadmill Run"
+                        : run.run_type || "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Distance">
+                    {run.distance_km} km
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Duration">
+                    {run.duration_minutes} min
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Pace">
+                    {formatPace(run.pace_min_per_km)} min/km
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Max pace (peak speed)">
+                    {run.max_speed_m_s != null && run.max_speed_m_s > 0
+                      ? `${formatPace(60 / (run.max_speed_m_s * 3.6))} min/km`
+                      : "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Avg heart rate">
+                    {run.avg_heart_rate != null ? `${run.avg_heart_rate} bpm` : "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Max heart rate">
+                    {run.max_heart_rate != null ? `${run.max_heart_rate} bpm` : "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Cadence (avg, both feet)">
+                    {run.average_cadence_spm != null
+                      ? `${Math.round(run.average_cadence_spm * 2)} spm`
+                      : "—"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Stride length (est.)">
+                    {run.stride_length_m != null
+                      ? `${Number(run.stride_length_m).toFixed(1)} m`
+                      : "—"}
+                  </Descriptions.Item>
+                  
+                  {/* <Descriptions.Item label="Calories">
+                    {run.calories != null
+                      ? `${run.calories} kcal`
+                      : run.calories_burned != null
+                        ? `${run.calories_burned} kcal`
+                        : "—"}
+                  </Descriptions.Item> */}
+                  {/* {run.strava_activity_id != null && (
+                    <Descriptions.Item label="Strava activity ID">
+                      {run.strava_activity_id}
+                    </Descriptions.Item>
+                  )} */}
+                  {run.run_type === "outdoor" && (
+                    <>
+                      <Descriptions.Item label="Weather status">
+                        {run.weather_status === "pending" || run.weather_status === "updating"
+                          ? "Updating…"
+                          : run.weather_status === "failed"
+                            ? "Unavailable"
+                            : run.weather_status || "—"}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Weather">
+                        {run.weather || "—"}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Temperature">
+                        {run.temperature_c != null ? `${run.temperature_c} °C` : "—"}
+                      </Descriptions.Item>
+                      {/* <Descriptions.Item label="Location">
+                        {run.location || "—"}
+                      </Descriptions.Item> */}
+                    </>
+                  )}
+                  {/* <Descriptions.Item label="Notes">
+                    {run.notes || "—"}
+                  </Descriptions.Item> */}
+                </Descriptions>
+              </div>
+            )}
           </Card>
         )}
       />

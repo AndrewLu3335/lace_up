@@ -79,9 +79,3 @@ Icon?
 # Misc
 # =============================
 coverage/.env
-
-# =============================
-# config instructions
-# =============================
-CRON_SETUP_GUIDE.md
-POLLING_SETUP.md

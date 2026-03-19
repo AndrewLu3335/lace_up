@@ -214,9 +214,11 @@ const RunStats = () => {
     const chartData = getChartData();
 
     return (
-        <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto", display: 'flex', flexDirection: 'column', minHeight: '100vh' }}> {/* 加点容器样式 */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                <Title level={2} style={{ margin: 0 }}>Running Statistics</Title>
+        <div style={{ padding: "12px 16px", maxWidth: "1200px", margin: "0 auto", display: 'flex', flexDirection: 'column', minHeight: '100vh' }}> 
+            <div style={{ flexWrap: "wrap", gap: "12px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                <div style={{ width: "100%", wordBreak: "break-word", flex: 1, minWidth:"0" }}>
+                    <Title level={2} style={{ margin: 0 }}>Running Statistics</Title>
+                </div>
                 <Space>
                     <Button type="primary" size="large" onClick={() => navigate("/runs")}>
                         View All Records and heatmap →
@@ -232,7 +234,7 @@ const RunStats = () => {
 
                 {/* Summary Cards */}
                 <Row gutter={16} style={{ marginBottom: "24px" }}>
-                    <Col span={6}>
+                    <Col xs={24} sm={12} md={6}>
                         <Card>
                             <Statistic
                                 title="This Week Volume"
@@ -243,7 +245,7 @@ const RunStats = () => {
                             />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col  xs={24} sm={12} md={6}>
                         <Card>
                             <Statistic
                                 title="This Month Volume"
@@ -254,12 +256,12 @@ const RunStats = () => {
                             />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col  xs={24} sm={12} md={6}>
                         <Card>
                             <Statistic title="Total Runs" value={stats.total_runs} />
                         </Card>
                     </Col>
-                    <Col span={6}>
+                    <Col  xs={24} sm={12} md={6}>
                         <Card>
                             <Statistic
                                 title="Average Pace"
@@ -272,7 +274,7 @@ const RunStats = () => {
                 {/* Merged Volume Chart with Controls */}
                 <Card
                     title={
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px'}}>
                             <span>Running Volume</span>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 {/* Unit Selector: Weekly / Monthly */}
@@ -335,7 +337,7 @@ const RunStats = () => {
                 {/* Pace Trend Chart */}
                 <Card
                     title={
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                             <span>Pace Trend</span>
                             <Select
                                 value={paceRange}

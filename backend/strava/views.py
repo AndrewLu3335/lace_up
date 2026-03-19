@@ -31,6 +31,8 @@ FIRST_SYNC_LIMIT_DAYS = 30  # First sync only get activities from last 30 days
 FIRST_SYNC_MAX_ACTIVITIES = 50  # First sync max activities to sync
 FIRST_SYNC_WITH_WEATHER = 10  # First 10 activities sync with weather data
 WEATHER_UPDATE_BATCH_SIZE = 20  # Update weather for max 20 records per sync
+# Strava summary: running average_cadence is often per-leg; total steps/min (both feet) ≈ 2x (matches watch / Strava UI).
+STRAVA_RUNNING_CADENCE_LEG_TO_TOTAL_SPM = 2.0
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -421,6 +423,41 @@ def _extract_run_record_data(user, activity, strava_activity_id, skip_weather=Fa
     calories = activity.get("calories")
     polyline = activity.get("map", {}).get("summary_polyline")
 
+    # Cadence / max HR / max speed (Strava activity summary fields)
+    avg_cadence = activity.get("average_cadence")
+    if avg_cadence is not None:
+        try:
+            avg_cadence = float(avg_cadence)
+        except (TypeError, ValueError):
+            avg_cadence = None
+        else:
+            if activity.get("type") == "Run":
+                avg_cadence *= STRAVA_RUNNING_CADENCE_LEG_TO_TOTAL_SPM
+
+    max_hr = activity.get("max_heartrate")
+    if max_hr is not None:
+        try:
+            max_hr = int(round(float(max_hr)))
+        except (TypeError, ValueError):
+            max_hr = None
+
+    max_speed_m_s = activity.get("max_speed")
+    if max_speed_m_s is not None:
+        try:
+            max_speed_m_s = float(max_speed_m_s)
+        except (TypeError, ValueError):
+            max_speed_m_s = None
+
+    # Stride (m): distance_m / step_count; step_count ≈ (moving_time/60) * cadence (spm)
+    distance_m = float(activity.get("distance") or 0)
+    moving_time = int(activity.get("moving_time") or 0)
+    stride_m = None
+    if avg_cadence and avg_cadence > 0 and moving_time > 0 and distance_m > 0:
+        minutes = moving_time / 60.0
+        total_steps = minutes * avg_cadence
+        if total_steps > 0:
+            stride_m = round(distance_m / total_steps, 3)
+
     # Parse date
     local_date_str = activity["start_date_local"]
     try:
@@ -452,12 +489,16 @@ def _extract_run_record_data(user, activity, strava_activity_id, skip_weather=Fa
         "distance_km": distance_km,
         "duration_minutes": duration_minutes,
         "avg_heart_rate": avg_hr,
+        "max_heart_rate": max_hr,
+        "average_cadence_spm": avg_cadence,
+        "stride_length_m": stride_m,
+        "max_speed_m_s": max_speed_m_s,
         "calories": calories,
         "date": date_obj,
         "run_type": run_type,
         "weather": weather,
         "temperature_c": temperature,
-        "polyline": polyline
+        "polyline": polyline,
     }
 
 

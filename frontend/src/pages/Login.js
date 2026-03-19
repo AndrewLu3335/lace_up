@@ -23,7 +23,7 @@ const Login = () => {
                     marginBottom: 10,
                     fontWeight: 800,
                     letterSpacing: '-0.5px',
-                    color: '#1f2937' // 深灰/黑
+                    color: '#1f2937' // dark gray / near black
                 }}>
                     Welcome to Lace<span style={{ color: THEME_COLOR }}>Up</span>
                 </Title>
@@ -32,7 +32,7 @@ const Login = () => {
                     display: 'block',
                     marginBottom: 40,
                     fontSize: '16px',
-                    color: '#6b7280', // 次级灰
+                    color: '#6b7280', // secondary gray
                     fontWeight: 400
                 }}>
                     Visualize your running journey
@@ -40,10 +40,10 @@ const Login = () => {
                 <div
                     onClick={handleLogin}
                     style={{
-                        cursor: 'pointer', // 鼠标变小手
+                        cursor: 'pointer', // pointer on hover
                         display: 'inline-block',
-                        borderRadius: '4px', // 配合图片的圆角
-                        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', // 平滑动画
+                        borderRadius: '4px', // match image corner radius
+                        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', // smooth hover transition
 
                         boxShadow: '0 4px 6px rgba(252, 76, 2, 0.2)',
                         transform: 'translateY(0)',
