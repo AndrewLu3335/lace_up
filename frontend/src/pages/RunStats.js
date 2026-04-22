@@ -15,6 +15,7 @@ import {
     ResponsiveContainer,
     BarChart,
     Bar,
+    ReferenceLine,
 } from "recharts";
 import StravaFooter from "../components/StravaFooter";
 
@@ -213,6 +214,9 @@ const RunStats = () => {
 
     const chartData = getChartData();
 
+    const paceData = getPaceData();
+    const avgPace = paceData.length > 0 ? paceData.reduce((sum, d) =>sum + (Number(d.pace)), 0) / paceData.length : null;
+
     return (
         <div style={{ padding: "12px 16px", maxWidth: "1200px", margin: "0 auto", display: 'flex', flexDirection: 'column', minHeight: '100vh' }}> 
             <div style={{ flexWrap: "wrap", gap: "12px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
@@ -367,6 +371,7 @@ const RunStats = () => {
                                 }}
                             />
                             <Tooltip />
+                            {avgPace != null && (<ReferenceLine y={avgPace} stroke="#1677ff" strokeDasharray="6 6" label={`Average Pace: ${formatPace(avgPace)} min/km`} />)}
                             <Line type="monotone" dataKey="pace" stroke="#ff7300" />
                         </LineChart>
                     </ResponsiveContainer>

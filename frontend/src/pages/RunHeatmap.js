@@ -63,7 +63,6 @@ const RunHeatmap = forwardRef(({ runs, selectedRun }, ref) => {
                 {/* draw polylines */}
                 {polylines.map((item, idx) => (
                     <>
-                        {/* Draw multiple overlapping polylines for selected route to make it thicker */}
                         {item.isSelected ? (
                             <>
                                 <Polyline

@@ -1,0 +1,111 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: lace_up
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: lace_up
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lace_up"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    image: python:3.12-slim
+    working_dir: /app
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "
+      pip install -r requirements.txt &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    environment:
+      HOST: 0.0.0.0
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    command: >
+      sh -c "
+      npm install &&
+      npm start
+      "
+
+  sync_scheduler:
+    image: python:3.12-slim
+    working_dir: /app
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    restart: unless-stopped
+    command: >
+      sh -c "
+      pip install -r requirements.txt &&
+      while true; do
+        python manage.py sync_activities --fast-mode ;
+        sleep 600 ;
+      done
+      "
+
+  weather_scheduler:
+    image: python:3.12-slim
+    working_dir: /app
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    restart: unless-stopped
+    command: >
+      sh -c "
+      pip install -r requirements.txt &&
+      while true; do
+        python manage.py update_weather --batch-size 20 ;
+        sleep 3600 ;
+      done
+      "
+volumes:
+  pgdata:
+  frontend_node_modules:
