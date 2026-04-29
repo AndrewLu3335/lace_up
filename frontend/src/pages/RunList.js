@@ -476,9 +476,9 @@ export default function RunList() {
                   <Descriptions.Item label="Max heart rate">
                     {run.max_heart_rate != null ? `${run.max_heart_rate} bpm` : "—"}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Cadence (avg, both feet)">
+                  <Descriptions.Item label="Cadence">
                     {run.average_cadence_spm != null
-                      ? `${Math.round(run.average_cadence_spm * 2)} spm`
+                      ? `${Math.round(run.average_cadence_spm)} spm`
                       : "—"}
                   </Descriptions.Item>
                   <Descriptions.Item label="Stride length (est.)">

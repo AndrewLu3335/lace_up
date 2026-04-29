@@ -1,0 +1,59 @@
+// format pace to mm:ss
+export function formatPace(minutes) {
+    if (!minutes) return "0:00";
+    const m = Math.floor(minutes);
+    const s = Math.round((minutes - m) * 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+};
+
+// generate local YYYY-MM-DD string (to solve timezone offset issue)
+export function getLocalDayKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+// generate local YYYY-MM string
+export function getLocalMonthKey(date){
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
+
+// get monday date
+export function getMondayDate(date){
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // calculate monday
+    d.setDate(diff);
+    return d;
+};
+
+// get chart data
+export function getChartData(processData, timeUnit, timeRange) {
+    const data = [];
+    const map = processData[timeUnit] || {};
+    const now = new Date();
+
+    for (let i = timeRange - 1; i >= 0; i--) {
+        let key;
+
+        if (timeUnit === "weekly") {
+            // calculate the date of the previous week
+            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (i * 7));
+            const monday = getMondayDate(d);
+            key = getLocalDayKey(monday); // must use the same getLocalDayKey
+        } else {
+            // Monthly
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            key = getLocalMonthKey(d); // must use the same getLocalMonthKey
+        }
+
+        data.push({
+            date: key,
+            distance: map[key] ? parseFloat(map[key].toFixed(2)) : 0,
+        });
+    }
+    return data;
+};
