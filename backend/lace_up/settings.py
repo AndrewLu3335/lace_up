@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -181,3 +182,18 @@ REST_FRAMEWORK = {
     ],
 }
 
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/1")
+CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True
+
+CELERY_BEAT_SCHEDULE = {
+    "sync-activities-every-10-min": {
+        "task": "strava.tasks.sync_activities_task",
+        "schedule": crontab(minute="*/10"),
+    },
+    "update-weather-hourly": {
+        "task": "strava.tasks.update_weather_task",
+        "schedule": crontab(minute=0),
+    },
+}

@@ -6,3 +6,5 @@ python-dotenv==1.2.1
 requests==2.32.3
 gunicorn
 pytz
+celery==5.4.0
+redis==5.0.8
