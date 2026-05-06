@@ -154,15 +154,16 @@ CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
 
 LOCAL_TZ = "America/Toronto"
 
+STRAVA_OAUTH_URL = "https://www.strava.com/oauth"
 STRAVA_CLIENT_ID = os.getenv('STRAVA_CLIENT_ID')
 STRAVA_CLIENT_SECRET = os.getenv('STRAVA_CLIENT_SECRET')
 # Set in .env for production; required for Strava webhook subscription verification
 STRAVA_WEBHOOK_VERIFY_TOKEN = os.getenv('STRAVA_WEBHOOK_VERIFY_TOKEN')
-
-
+STRAVA_API_BASE_URL = "https://www.strava.com/api/v3"
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
 STRAVA_REDIRECT_URI = f"{BACKEND_URL}/api/strava/callback/"
 
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 CSRF_TRUSTED_ORIGINS = [

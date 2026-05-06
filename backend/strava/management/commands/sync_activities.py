@@ -4,8 +4,8 @@ This command can be run periodically (e.g., via cron) to sync new activities.
 """
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from strava.views import fetch_and_sync_activities, refresh_strava_token
-from strava.models import StravaProfile
+from strava.services.sync import fetch_and_sync_activities
+from strava.services.oauth import refresh_strava_token
 import logging
 
 logger = logging.getLogger(__name__)

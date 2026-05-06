@@ -501,15 +501,8 @@ export default function RunList() {
                   )} */}
                   {run.run_type === "outdoor" && (
                     <>
-                      <Descriptions.Item label="Weather status">
-                        {run.weather_status === "pending" || run.weather_status === "updating"
-                          ? "Updating…"
-                          : run.weather_status === "failed"
-                            ? "Unavailable"
-                            : run.weather_status || "—"}
-                      </Descriptions.Item>
                       <Descriptions.Item label="Weather">
-                        {run.weather || "—"}
+                        {run.weather || "updating..."}
                       </Descriptions.Item>
                       <Descriptions.Item label="Temperature">
                         {run.temperature_c != null ? `${run.temperature_c} °C` : "—"}

@@ -5,8 +5,7 @@ This command can be run periodically (e.g., via cron) to update weather data.
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from django.utils import timezone
-from runs.models import RunRecord
-from strava.views import _update_missing_weather_data
+from strava.services.weather import _update_missing_weather_data
 import logging
 
 logger = logging.getLogger(__name__)
