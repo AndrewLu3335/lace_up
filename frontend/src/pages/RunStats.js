@@ -2,27 +2,15 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Typography, Spin, Select, Button, Space } from "antd";
+import { Card, Col, Row, Statistic, Typography, Spin, Button, Space } from "antd";
 import { LogoutOutlined } from "@ant-design/icons";
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
-    BarChart,
-    Bar,
-    ReferenceLine,
-} from "recharts";
 import StravaFooter from "../components/StravaFooter";
 import PaceTrendCard from "../components/stats/PaceTrendCard.jsx";
 import VolumeChartCard from "../components/stats/VolumeChartCard.jsx";
-import { formatPace, getLocalDayKey, getLocalMonthKey, getMondayDate, getChartData } from "../utils/runStats";
+import { formatPace, getChartData } from "../utils/runStats";
 import useRunStats from "../hooks/useRunStats";
 const { Title } = Typography;
+const LOGIN_SYNC_SESSION_KEY = 'laceup_login_sync_handled';
 
 const RunStats = () => {
     
@@ -34,12 +22,12 @@ const RunStats = () => {
     const handleLogout = () => {
         axios.post(`${process.env.REACT_APP_API_URL}/api/strava/logout/`)
             .then(() => {
-                localStorage.removeItem('isAuthenticated');
+                sessionStorage.removeItem(LOGIN_SYNC_SESSION_KEY);
                 navigate("/login");
             })
             .catch((err) => {
                 console.error("Logout failed:", err);
-                localStorage.removeItem('isAuthenticated');
+                sessionStorage.removeItem(LOGIN_SYNC_SESSION_KEY);
                 navigate("/login");
             });
     };

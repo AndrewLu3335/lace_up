@@ -205,11 +205,11 @@ def _extract_run_record_data(user, activity, strava_activity_id, skip_weather=Fa
     calories = activity.get("calories")
     polyline = activity.get("map", {}).get("summary_polyline")
 
-    # Cadence / max HR / max speed (Strava activity summary fields)
+    # Cadence: Strava API is one-foot SPM (~85); app/runners use both feet (~170).
     avg_cadence = activity.get("average_cadence")
     if avg_cadence is not None:
         try:
-            avg_cadence = float(avg_cadence)
+            avg_cadence = float(avg_cadence) * 2
         except (TypeError, ValueError):
             avg_cadence = None
 

@@ -9,7 +9,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/runs" replace />} />
         <Route element={<PrivateRoute />}>
           <Route path="/add-run" element={<AddRun />} />
           <Route path="/runs" element={<RunList />} />

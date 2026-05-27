@@ -13,25 +13,31 @@ from rest_framework.permissions import IsAuthenticated
 from .services.oauth import refresh_strava_token
 from .services.sync import fetch_and_sync_activities
 from .services.weather import _update_missing_weather_data, _trigger_weather_update_task
-
+from .services.auth import CsrfExemptSessionAuthentication
+import secrets
 logger = logging.getLogger(__name__)
 
 # Constants
 REQUEST_TIMEOUT_SECONDS = 30  # HTTP request timeout
 WEATHER_UPDATE_BATCH_SIZE = 20  # Update weather for max 20 records per sync
 
-from .services.auth import CsrfExemptSessionAuthentication
+
 
 
 def strava_connect(request):
     '''
     Strava Connect View
+    Redirects user to Strava's OAuth authorization page with necessary parameters.
     '''
+    state = secrets.token_urlsafe(32)
+    request.session['oauth_state'] = state
+
     auth_url = (
         f"{settings.STRAVA_OAUTH_URL}/authorize"
         f"?client_id={settings.STRAVA_CLIENT_ID}"
         "&response_type=code"
         f"&redirect_uri={settings.STRAVA_REDIRECT_URI}"
+        f"&state={state}"
         "&approval_prompt=auto"
         "&scope=activity:read_all,profile:read_all" # Get user profile and activities
     )
@@ -41,10 +47,19 @@ def strava_connect(request):
 def strava_callback(request):
     '''
     Strava Callback View
+    Handles the OAuth callback from Strava, exchanges code for token, and logs in the user.
     '''
+    if request.GET.get("error"):
+        return redirect(f"{settings.FRONTEND_URL}/login?error=access_denied")
+
     code = request.GET.get("code")
+    state = request.GET.get("state")
+    expected = request.session.pop('oauth_state', None)
+
     if not code:
-        return HttpResponse("No code received")
+        return redirect(f"{settings.FRONTEND_URL}/login?error=no_code")
+    if not state or state != expected:
+        return redirect(f"{settings.FRONTEND_URL}/login?error=invalid_state")
 
     # 1. Exchange Code for Token
     try:
@@ -62,10 +77,10 @@ def strava_callback(request):
         token_res = token_res.json()
     except requests.RequestException as e:
         logger.error(f"Error exchanging Strava code for token: {e}")
-        return HttpResponse(f"Strava Error: Failed to exchange code", status=500)
+        return redirect(f"{settings.FRONTEND_URL}/login?error=token_exchange_failed")
 
     if 'access_token' not in token_res:
-        return HttpResponse(f"Strava Error: {token_res}")
+        return redirect(f"{settings.FRONTEND_URL}/login?error=token_exchange_failed")
 
     # 2. Extract user info
     access_token = token_res["access_token"]
@@ -92,23 +107,30 @@ def strava_callback(request):
 
     except StravaProfile.DoesNotExist:
         # Case B: New user logging in
-        # Create a unique username, prevent conflicts
         new_username = f"runner_{strava_id}"
-        
-        # Check if Django User already exists (rare, but prevent just in case)
-        user, created = User.objects.get_or_create(username=new_username)
-        
-        # Create StravaProfile
-        profile = StravaProfile.objects.create(
-            user=user,
-            strava_id=strava_id,
-            strava_username=strava_username,
-            access_token=access_token,
-            refresh_token=refresh_token,
-            expires_at=expires_at,
-            avatar_url=avatar_url,
-        )
-        logger.info(f"New user {user.username} created via Strava.")
+        user, _ = User.objects.get_or_create(username=new_username)
+
+        if hasattr(user, 'strava_profile'):
+            profile = user.strava_profile
+            profile.strava_id = strava_id
+            profile.strava_username = strava_username
+            profile.access_token = access_token
+            profile.refresh_token = refresh_token
+            profile.expires_at = expires_at
+            profile.avatar_url = avatar_url
+            profile.save()
+            logger.info(f"Linked existing user {user.username} to Strava {strava_id}.")
+        else:
+            profile = StravaProfile.objects.create(
+                user=user,
+                strava_id=strava_id,
+                strava_username=strava_username,
+                access_token=access_token,
+                refresh_token=refresh_token,
+                expires_at=expires_at,
+                avatar_url=avatar_url,
+            )
+            logger.info(f"New user {user.username} created via Strava.")
 
     # 4. Execute Django login (let session take effect)
     login(request, user)
@@ -204,7 +226,7 @@ def strava_logout(request):
 @csrf_exempt
 def strava_webhook(request):
     '''
-    Strava webhook
+    Strava webhook: subscription verification (GET) and deauthorization events (POST).
     '''
     # Verify webhook
     if request.method == 'GET':
@@ -246,3 +268,26 @@ def strava_webhook(request):
             return HttpResponse('Server Error', status=500)
 
     return HttpResponse('Method Not Allowed', status=405)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes([CsrfExemptSessionAuthentication]) 
+@permission_classes([IsAuthenticated])
+def auth_me(request):
+    '''
+    Return the authenticated user's public profile (no Strava tokens).
+    '''
+    user = request.user
+    try:
+        profile = user.strava_profile
+    except StravaProfile.DoesNotExist:
+        return JsonResponse({"error": "Strava not connected"}, status=400)
+
+    return JsonResponse({
+        'id': user.id,
+        'username': user.username,
+        'strava_id': profile.strava_id,
+        'strava_username': profile.strava_username,
+        'avatar_url': profile.avatar_url,
+    })

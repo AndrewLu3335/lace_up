@@ -5,7 +5,8 @@ from .views import (
     sync_strava_activities, 
     strava_logout, 
     strava_webhook,
-    update_weather_data
+    update_weather_data,
+    auth_me
 )
 
 urlpatterns = [
@@ -15,4 +16,5 @@ urlpatterns = [
     path("update-weather/", update_weather_data),
     path("logout/", strava_logout),
     path('webhook/', strava_webhook, name='strava_webhook'),
+    path('me/', auth_me)
 ]

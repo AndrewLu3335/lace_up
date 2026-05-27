@@ -1,19 +1,19 @@
 
 import React from 'react';
-import { Navigate, Outlet, useSearchParams } from 'react-router-dom';
-
+import { Navigate, Outlet} from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { Spin } from 'antd';
 const PrivateRoute = () => {
-    // Simple check: if "isAuthenticated" is in localStorage, we allow access.
-    // Otherwise, redirect to login.
+    const { status } = useAuth();
 
-    const [searchParams] = useSearchParams();
-    let isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (searchParams.get('login_success') === '1') {
-        isAuthenticated = true;
+    if (status === 'loading') {
+        return (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 80 }}>
+            <Spin size="large" />
+          </div>
+        );
     }
-
-
-    return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+    return  status === 'authenticated' ? <Outlet /> : <Navigate to="/login" />;
 };
 
 export default PrivateRoute;

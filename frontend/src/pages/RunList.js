@@ -20,6 +20,7 @@ import StravaFooter from "../components/StravaFooter";
 import LoadingScreen from "../components/LoadingScreen.js";
 
 const { Title, Text } = Typography;
+const LOGIN_SYNC_SESSION_KEY = 'laceup_login_sync_handled';
 
 export default function RunList() {
   const [loading, setLoading] = useState(true);
@@ -114,15 +115,14 @@ export default function RunList() {
   }, [_checkAndStartWeatherPolling]);
 
   const handleLogout = () => {
-    // Call backend to destroy session
     axios.post(`${process.env.REACT_APP_API_URL}/api/strava/logout/`)
       .then(() => {
-        localStorage.removeItem('isAuthenticated');
+        sessionStorage.removeItem(LOGIN_SYNC_SESSION_KEY);
         navigate("/login");
       })
       .catch((err) => {
         console.error("Logout failed:", err);
-        localStorage.removeItem('isAuthenticated');
+        sessionStorage.removeItem(LOGIN_SYNC_SESSION_KEY);
         navigate("/login");
       });
   };
@@ -157,11 +157,15 @@ export default function RunList() {
     const loginSuccess = searchParams.get('login_success') === '1';
     console.log("Login check:", { loginSuccess, hasHandledLogin: hasHandledLogin.current, searchParams: searchParams.toString() });
     
-    if (loginSuccess && !hasHandledLogin.current) {
+    if (
+      loginSuccess &&
+      !hasHandledLogin.current &&
+      !sessionStorage.getItem(LOGIN_SYNC_SESSION_KEY)
+    ) {
       console.log("Login success detected, starting auto sync");
       hasHandledLogin.current = true;
+      sessionStorage.setItem(LOGIN_SYNC_SESSION_KEY, '1');
       setShowHintAfterLogin(true);
-      localStorage.setItem('isAuthenticated', 'true');
       
       // Start sync immediately, before navigating
       console.log("Calling handleAutoSync immediately");
