@@ -88,6 +88,13 @@ WSGI_APPLICATION = "lace_up.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+DATABASE_OPTIONS = {}
+
+if os.getenv('DB_SSLMODE'):
+    DATABASE_OPTIONS['sslmode'] = os.getenv('DB_SSLMODE')
+
+if os.getenv('DB_CHANNEL_BINDING'):
+    DATABASE_OPTIONS['channel_binding'] = os.getenv('DB_CHANNEL_BINDING')
 
 DATABASES = {
     'default': {
@@ -97,6 +104,7 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASS'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT', '5432'),
+        'OPTIONS': DATABASE_OPTIONS,
     }
 }
 
