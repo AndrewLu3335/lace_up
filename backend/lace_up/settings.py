@@ -21,6 +21,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env file
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
+# Helper function to parse comma-separated environment variables into Python lists
+def env_list(name, default=""):
+    value = os.getenv(name, default)
+    return [item.strip() for item in value.split(",") if item.strip()]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -32,7 +37,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 
 
 # Application definition
@@ -140,12 +145,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://laceuprun.com",
-    "https://www.laceuprun.com",
-]
+# Allow cookies to be sent from frontend to backend for authentication
+CORS_ALLOWED_ORIGINS = env_list(
+    'CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000',
+)
 
 SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
 SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
@@ -166,12 +169,11 @@ STRAVA_REDIRECT_URI = f"{BACKEND_URL}/api/strava/callback/"
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://laceuprun.com",
-    "https://www.laceuprun.com",
-]
+# Allow CSRF tokens to be accepted from frontend for authentication
+CSRF_TRUSTED_ORIGINS = env_list(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000',
+)
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
