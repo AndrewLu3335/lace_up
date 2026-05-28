@@ -21,6 +21,10 @@ staticfiles/
 media/
 static/
 
+# Celery runtime state
+celerybeat-schedule
+backend/celerybeat-schedule
+
 # Django local settings
 local_settings.py
 
@@ -85,4 +89,3 @@ coverage/.env
 # cursor
 # =============================
 .cursorrules
-
