@@ -2,12 +2,21 @@
 
 This document describes the AWS deployment used for Lace Up.
 
-The current deployment runs the Django backend as a container on **Amazon ECS Express Mode**, pulls the image from **Amazon ECR**, and connects to **Neon PostgreSQL** over SSL.
+The current deployment serves the React frontend from **Amazon S3 + CloudFront**. The Django backend runs as a container on **Amazon ECS Express Mode**, pulls the image from **Amazon ECR**, and connects to **Neon PostgreSQL** over SSL.
 
 ## Current Architecture
 
 ```txt
 Browser
+  |
+  v
+CloudFront frontend
+  |
+  v
+S3 bucket with React build files
+  |
+  v
+React app calls ECS backend
   |
   v
 ECS Express Mode public URL
@@ -25,9 +34,40 @@ Neon PostgreSQL over SSL
 Supporting services:
 
 ```txt
+Amazon S3        stores the React production build
+CloudFront       serves the frontend over HTTPS
 Amazon ECR       stores the backend Docker image
 CloudWatch Logs  stores container logs
 Strava OAuth     handles user login and activity access
+```
+
+## Live Frontend
+
+Frontend URL:
+
+```txt
+https://d2vzk92s1ndecx.cloudfront.net
+```
+
+S3 bucket:
+
+```txt
+lace-up-frontend-206501439453
+```
+
+CloudFront distribution:
+
+```txt
+E3URSSJOUQ5OLD
+```
+
+The CloudFront distribution uses the S3 bucket as its origin and grants CloudFront private access to the bucket. The bucket should not be public.
+
+React Router requires SPA fallback responses so browser refreshes on client-side routes continue to serve `index.html`:
+
+```txt
+403 -> /index.html -> 200
+404 -> /index.html -> 200
 ```
 
 ## Live Backend
@@ -182,7 +222,7 @@ The Strava client secret must stay on the backend. Do not expose it in frontend 
 
 ```env
 BACKEND_URL=https://la-886cab73b2ca41d79c05f9e9855b0c21.ecs.us-east-1.on.aws
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=https://d2vzk92s1ndecx.cloudfront.net
 ```
 
 `BACKEND_URL` is used to generate the Strava OAuth callback:
@@ -206,13 +246,20 @@ la-886cab73b2ca41d79c05f9e9855b0c21.ecs.us-east-1.on.aws
 ### Browser Security
 
 ```env
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://d2vzk92s1ndecx.cloudfront.net
+CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://d2vzk92s1ndecx.cloudfront.net
 SESSION_COOKIE_SECURE=True
-SESSION_COOKIE_SAMESITE=Lax
+SESSION_COOKIE_SAMESITE=None
 ```
 
-When the React frontend is deployed to S3 and CloudFront, update these values to the CloudFront or custom frontend domain:
+`SESSION_COOKIE_SAMESITE=None` is required because the frontend and backend currently use different sites:
+
+```txt
+Frontend: https://d2vzk92s1ndecx.cloudfront.net
+Backend:  https://la-886cab73b2ca41d79c05f9e9855b0c21.ecs.us-east-1.on.aws
+```
+
+When a custom frontend domain is added, update these values to the custom domain:
 
 ```env
 FRONTEND_URL=https://<frontend-domain>
@@ -250,6 +297,8 @@ The local `.env.neon` file is ignored by Git and should contain the same databas
 
 ## Deployment Flow
 
+### Backend
+
 1. Make code changes.
 2. Commit changes.
 3. Build and push an amd64 image to ECR:
@@ -276,6 +325,47 @@ aws ecs update-service \
 curl -i https://la-886cab73b2ca41d79c05f9e9855b0c21.ecs.us-east-1.on.aws/api/health/
 ```
 
+### Frontend
+
+Create a production env file from the committed example:
+
+```bash
+cp frontend/.env.production.example frontend/.env.production
+```
+
+Build the React app:
+
+```bash
+cd frontend
+npm run build
+```
+
+Upload the build output to S3:
+
+```bash
+cd ..
+aws s3 sync frontend/build s3://lace-up-frontend-206501439453 \
+  --delete \
+  --region us-east-1
+```
+
+If CloudFront has cached old assets, create an invalidation:
+
+```bash
+aws cloudfront create-invalidation \
+  --distribution-id E3URSSJOUQ5OLD \
+  --paths "/*"
+```
+
+Verify the frontend:
+
+```bash
+curl -I https://d2vzk92s1ndecx.cloudfront.net/
+curl -I https://d2vzk92s1ndecx.cloudfront.net/runs
+```
+
+Both should return `200`. The `/runs` check confirms the SPA fallback is working.
+
 ## Debugging
 
 Check ECS service status:
@@ -297,6 +387,14 @@ aws ecs list-tasks \
   --desired-status RUNNING
 ```
 
+Check CloudFront distribution status:
+
+```bash
+aws cloudfront get-distribution \
+  --id E3URSSJOUQ5OLD \
+  --query 'Distribution.{Status:Status,DomainName:DomainName,Enabled:DistributionConfig.Enabled}'
+```
+
 Common issues:
 
 | Symptom | Likely cause | Fix |
@@ -306,6 +404,8 @@ Common issues:
 | Strava says `redirect_uri invalid` | `BACKEND_URL` does not match Strava callback domain | Set `BACKEND_URL` to the ECS public URL and set Strava Authorization Callback Domain to the same domain |
 | Browser CORS error | Frontend origin not in `CORS_ALLOWED_ORIGINS` | Add the exact frontend origin, including scheme |
 | CSRF failure | Frontend origin not trusted or cookies not sent | Add origin to `CSRF_TRUSTED_ORIGINS` and ensure frontend sends credentials |
+| Login succeeds but frontend still shows logged out | Session cookie is blocked on cross-site requests | Use `SESSION_COOKIE_SAMESITE=None` and `SESSION_COOKIE_SECURE=True` |
+| Refreshing `/runs` returns 403 or 404 | CloudFront/S3 is looking for a real `/runs` file | Add CloudFront custom error responses: `403/404 -> /index.html -> 200` |
 
 ## Cost Notes
 

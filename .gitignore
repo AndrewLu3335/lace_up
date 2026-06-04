@@ -74,6 +74,8 @@ Icon?
 .env.production
 .env.*
 .env.*.local
+!.env.example
+!.env.production.example
 
 # =============================
 # Git
