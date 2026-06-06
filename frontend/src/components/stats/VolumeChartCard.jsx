@@ -33,7 +33,6 @@ export default function VolumeChartCard({
               onChange={(val) => setTimeRange(val)}
               style={{ width: 150 }}
             >
-              <Select.Option value={1}>Last 1 Month</Select.Option>
               <Select.Option value={3}>Last 3 Months</Select.Option>
               <Select.Option value={6}>Last 6 Months</Select.Option>
               <Select.Option value={12}>Last 1 Year</Select.Option>

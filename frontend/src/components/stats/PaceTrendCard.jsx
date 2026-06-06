@@ -14,13 +14,18 @@ import {
 export default function PaceTrendCard({ runs, paceRange, setPaceRange, formatPace }) {
   const paceData = useMemo(() => {
     if (!runs || runs.length === 0) return [];
-    const sorted = [...runs].sort((a, b) => new Date(b.date) - new Date(a.date));
-    const recent = sorted.slice(0, paceRange).reverse();
-    return recent.map((run) => ({
-      date: run.date.split("T")[0],
-      pace: run.distance_km > 0 ? Number((run.duration_minutes / run.distance_km).toFixed(2)) : 0,
-      distance: run.distance_km,
-    }));
+
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth() - paceRange, now.getDate());
+
+    return [...runs]
+      .filter((run) => new Date(run.date) >= startDate)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map((run) => ({
+        date: run.date.split("T")[0],
+        pace: run.distance_km > 0 ? Number((run.duration_minutes / run.distance_km).toFixed(2)) : 0,
+        distance: run.distance_km,
+      }));
   }, [runs, paceRange]);
 
   const avgPace = useMemo(() => {
@@ -35,10 +40,10 @@ export default function PaceTrendCard({ runs, paceRange, setPaceRange, formatPac
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
           <span>Pace Trend</span>
           <Select value={paceRange} onChange={(val) => setPaceRange(val)} style={{ width: 150 }}>
-            <Select.Option value={10}>Last 10 Runs</Select.Option>
-            <Select.Option value={20}>Last 20 Runs</Select.Option>
-            <Select.Option value={50}>Last 50 Runs</Select.Option>
-            <Select.Option value={100}>Last 100 Runs</Select.Option>
+            <Select.Option value={1}>Last 1 Month</Select.Option>
+            <Select.Option value={3}>Last 3 Months</Select.Option>
+            <Select.Option value={6}>Last 6 Months</Select.Option>
+            <Select.Option value={12}>Last 1 Year</Select.Option>
           </Select>
         </div>
       }

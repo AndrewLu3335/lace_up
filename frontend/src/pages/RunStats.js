@@ -10,6 +10,7 @@ import VolumeChartCard from "../components/stats/VolumeChartCard.jsx";
 import { formatPace, getChartData } from "../utils/runStats";
 import useRunStats from "../hooks/useRunStats";
 import WeeklyVolumeTrendCard from "../components/stats/WeeklyVolumeTrendCard.jsx";
+import MonthlyRunCalendarCard from "../components/stats/MonthlyRunCalendarCard.jsx";
 const { Title } = Typography;
 const LOGIN_SYNC_SESSION_KEY = 'laceup_login_sync_handled';
 
@@ -34,7 +35,7 @@ const RunStats = () => {
     };
 
     const [timeRange, setTimeRange] = useState(3);
-    const [paceRange, setPaceRange] = useState(20); //default pace range is 20 runs
+    const [paceRange, setPaceRange] = useState(3); // default pace range is 3 months
 
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
@@ -100,12 +101,7 @@ const RunStats = () => {
                         </Card>
                     </Col>
                     <Col  xs={24} sm={12} md={6}>
-                        <Card>
-                            <Statistic
-                                title="Average Pace"
-                                value={formatPace(stats.avg_pace)}
-                                suffix="min/km" />
-                        </Card>
+                        <MonthlyRunCalendarCard runs={runs} style={{ height: "100%", marginBottom: 0 }} />
                     </Col>
                 </Row>
 

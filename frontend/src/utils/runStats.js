@@ -58,6 +58,53 @@ export function getWeeklyVolumeTrendData(runs = [], weekCount = 12) {
   return data;
 }
 
+// get current month daily run calendar data
+export function getMonthlyRunCalendarData(runs = [], targetDate = new Date()) {
+  const year = targetDate.getFullYear();
+  const month = targetDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const distanceByDay = {};
+
+  runs.forEach((run) => {
+    const runDate = new Date(run.date);
+    if (runDate.getFullYear() !== year || runDate.getMonth() !== month) {
+      return;
+    }
+
+    const dayKey = getLocalDayKey(runDate);
+    distanceByDay[dayKey] = (distanceByDay[dayKey] || 0) + Number(run.distance_km || 0);
+  });
+
+  const days = [];
+  const leadingEmptyDays = firstDay.getDay();
+
+  for (let i = 0; i < leadingEmptyDays; i++) {
+    days.push(null);
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const date = new Date(year, month, day);
+    const dayKey = getLocalDayKey(date);
+    const distance = distanceByDay[dayKey] || 0;
+
+    days.push({
+      date: dayKey,
+      day,
+      distance: Number(distance.toFixed(2)),
+      hasRun: distance > 0,
+    });
+  }
+
+  return {
+    monthLabel: targetDate.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    }),
+    days,
+  };
+}
+
 // get chart data
 export function getChartData(processData, timeUnit, timeRange) {
     const data = [];
