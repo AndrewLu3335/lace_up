@@ -9,6 +9,7 @@ import PaceTrendCard from "../components/stats/PaceTrendCard.jsx";
 import VolumeChartCard from "../components/stats/VolumeChartCard.jsx";
 import { formatPace, getChartData } from "../utils/runStats";
 import useRunStats from "../hooks/useRunStats";
+import WeeklyVolumeTrendCard from "../components/stats/WeeklyVolumeTrendCard.jsx";
 const { Title } = Typography;
 const LOGIN_SYNC_SESSION_KEY = 'laceup_login_sync_handled';
 
@@ -32,8 +33,7 @@ const RunStats = () => {
             });
     };
 
-    const [timeUnit, setTimeUnit] = useState("weekly");
-    const [timeRange, setTimeRange] = useState(12);
+    const [timeRange, setTimeRange] = useState(3);
     const [paceRange, setPaceRange] = useState(20); //default pace range is 20 runs
 
     useEffect(() => {
@@ -49,7 +49,7 @@ const RunStats = () => {
         return <Spin size="large" style={{ display: "block", margin: "50px auto" }} />;
     }
 
-    const chartData = getChartData(processData, timeUnit, timeRange);
+    const chartData = getChartData(processData, "monthly", timeRange);
 
     return (
         <div style={{ padding: "12px 16px", maxWidth: "1200px", margin: "0 auto", display: 'flex', flexDirection: 'column', minHeight: '100vh' }}> 
@@ -111,11 +111,13 @@ const RunStats = () => {
 
                 {/* Merged Volume Chart with Controls */}
                 <VolumeChartCard 
-                    timeUnit={timeUnit} 
-                    setTimeUnit={setTimeUnit} 
                     timeRange={timeRange} 
                     setTimeRange={setTimeRange} 
-                    chartData={chartData} />
+                    chartData={chartData}
+                />
+
+                {/* Weekly Volume Trend Chart */}
+                <WeeklyVolumeTrendCard runs={runs} />
 
                 {/* Pace Trend Chart */}
                 <PaceTrendCard runs={runs} 
@@ -130,4 +132,3 @@ const RunStats = () => {
 };
 
 export default RunStats;
-

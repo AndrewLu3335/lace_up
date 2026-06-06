@@ -10,8 +10,6 @@ import {
   Tooltip,
 } from "recharts";
 export default function VolumeChartCard({
-  timeUnit,
-  setTimeUnit,
   timeRange,
   setTimeRange,
   chartData,
@@ -28,37 +26,17 @@ export default function VolumeChartCard({
             gap: "8px",
           }}
         >
-          <span>Running Volume</span>
+          <span>Monthly Running Volume</span>
           <div style={{ display: "flex", gap: "10px" }}>
-            <Select
-              value={timeUnit}
-              onChange={(val) => {
-                setTimeUnit(val);
-                setTimeRange(val === "weekly" ? 12 : 6);
-              }}
-              style={{ width: 120 }}
-            >
-              <Select.Option value="weekly">Weekly</Select.Option>
-              <Select.Option value="monthly">Monthly</Select.Option>
-            </Select>
-
             <Select
               value={timeRange}
               onChange={(val) => setTimeRange(val)}
               style={{ width: 150 }}
             >
-              {timeUnit === "weekly" ? (
-                <>
-                  <Select.Option value={4}>Last 4 Weeks</Select.Option>
-                  <Select.Option value={12}>Last 12 Weeks</Select.Option>
-                  <Select.Option value={26}>Last 6 Months</Select.Option>
-                </>
-              ) : (
-                <>
-                  <Select.Option value={6}>Last 6 Months</Select.Option>
-                  <Select.Option value={12}>Last 1 Year</Select.Option>
-                </>
-              )}
+              <Select.Option value={1}>Last 1 Month</Select.Option>
+              <Select.Option value={3}>Last 3 Months</Select.Option>
+              <Select.Option value={6}>Last 6 Months</Select.Option>
+              <Select.Option value={12}>Last 1 Year</Select.Option>
             </Select>
           </div>
         </div>
@@ -79,10 +57,7 @@ export default function VolumeChartCard({
             }}
           />
           <Tooltip />
-          <Bar
-            dataKey="distance"
-            fill={timeUnit === "weekly" ? "#8884d8" : "#82ca9d"}
-          />
+          <Bar dataKey="distance" fill="#82ca9d" />
         </BarChart>
       </ResponsiveContainer>
     </Card>

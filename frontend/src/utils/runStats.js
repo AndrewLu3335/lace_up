@@ -29,6 +29,34 @@ export function getMondayDate(date){
     d.setDate(diff);
     return d;
 };
+// get weekly volume trend data
+export function getWeeklyVolumeTrendData(runs = [], weekCount = 12) {
+  const weeklyMap = {};
+
+  runs.forEach((run) => {
+    const runDate = new Date(run.date);
+    const monday = getMondayDate(runDate);
+    const weekKey = getLocalDayKey(monday);
+
+    weeklyMap[weekKey] = (weeklyMap[weekKey] || 0) + Number(run.distance_km || 0);
+  });
+
+  const data = [];
+  const now = new Date();
+
+  for (let i = weekCount - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i * 7);
+    const monday = getMondayDate(d);
+    const weekKey = getLocalDayKey(monday);
+
+    data.push({
+      week: weekKey,
+      distance: weeklyMap[weekKey] ? Number(weeklyMap[weekKey].toFixed(2)) : 0,
+    });
+  }
+
+  return data;
+}
 
 // get chart data
 export function getChartData(processData, timeUnit, timeRange) {
