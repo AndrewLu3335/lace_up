@@ -37,6 +37,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
+ENABLE_E2E_TEST_AUTH = (
+    DEBUG and os.getenv("ENABLE_E2E_TEST_AUTH", "False") == "True"
+)
+
 ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 
 

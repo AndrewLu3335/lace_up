@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path, include
@@ -30,3 +31,8 @@ urlpatterns = [
     path("api/", include("runs.urls")),
     path("api/strava/", include("strava.urls")),
 ]
+
+if settings.ENABLE_E2E_TEST_AUTH:
+    from .test_auth import e2e_login
+
+    urlpatterns.append(path("api/test/login/", e2e_login))
