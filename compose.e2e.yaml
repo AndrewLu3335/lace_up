@@ -1,0 +1,5 @@
+services:
+  backend:
+    environment:
+      DEBUG: "True"
+      ENABLE_E2E_TEST_AUTH: "True"
