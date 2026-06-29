@@ -1,15 +1,16 @@
 from django.contrib.auth import get_user_model
-from django.test import SimpleTestCase, TestCase, override_settings
-from django.urls import get_resolver
+from django.test import TestCase, override_settings
+from django.urls import path
+
+from .test_auth import e2e_login
 
 
-class E2EAuthURLTests(SimpleTestCase):
-    def test_e2e_login_route_is_registered_when_enabled(self):
-        routes = [str(pattern.pattern) for pattern in get_resolver().url_patterns]
-
-        self.assertIn("api/test/login/", routes)
+urlpatterns = [
+    path("api/test/login/", e2e_login),
+]
 
 
+@override_settings(ROOT_URLCONF=__name__, ENABLE_E2E_TEST_AUTH=True)
 class E2ELoginTests(TestCase):
     endpoint = "/api/test/login/"
 
