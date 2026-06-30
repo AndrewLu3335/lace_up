@@ -42,7 +42,9 @@ The local Docker environment provides an opt-in session bootstrap endpoint for a
 POST /api/test/login/
 ```
 
-The endpoint creates or reuses a user whose username begins with `e2e_`. It is registered only when Django debug mode and `ENABLE_E2E_TEST_AUTH` are both enabled, and it accepts no password, OAuth token, or Strava credential.
+The endpoint creates or reuses a user whose username begins with `e2e_`. When required for private-route checks, it also creates a local test profile with a reserved negative Strava ID and empty token fields. It is registered only when Django debug mode and `ENABLE_E2E_TEST_AUTH` are both enabled, and it accepts no password, OAuth token, or Strava credential.
+
+The React authentication and run-list requests explicitly send credentials so the browser can reuse the Django Session across the local frontend and backend origins.
 
 Start the backend with local E2E authentication:
 

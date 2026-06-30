@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model, login
 from django.http import Http404, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from strava.models import StravaProfile
 
 
 @csrf_exempt
@@ -34,6 +35,17 @@ def e2e_login(request):
     if created:
         user.set_unusable_password()
         user.save(update_fields=["password"])
+
+    StravaProfile.objects.get_or_create(
+        user=user,
+        defaults={
+            "strava_id": -user.pk,
+            "strava_username": username,
+            "access_token": "",
+            "refresh_token": "",
+            "expires_at": 0,
+        },
+    )
 
     login(
         request,

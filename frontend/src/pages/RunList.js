@@ -50,7 +50,9 @@ export default function RunList() {
         .then((res) => {
           if (res.data.updated_count > 0 || res.data.remaining_count === 0) {
             // Refresh runs data
-            axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
+            axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`, {
+              withCredentials: true,
+            })
               .then((res) => setRuns(res.data))
               .catch((err) => console.error("Error fetching runs:", err));
           }
@@ -92,7 +94,9 @@ export default function RunList() {
         }
 
         // Always refresh runs after sync
-        return axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
+        return axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`, {
+          withCredentials: true,
+        })
           .then((res) => {
             console.log("Runs fetched after sync:", res.data.length);
             setRuns(res.data);
@@ -188,7 +192,9 @@ export default function RunList() {
     if (!hasHandledLogin.current && runs.length === 0) {
       // Only load if we don't have runs yet
       setLoading(true);
-      axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
+      axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`, {
+        withCredentials: true,
+      })
         .then((res) => {
           setRuns(res.data);
           setLoading(false);
@@ -237,7 +243,9 @@ export default function RunList() {
   // Always refetch runs after sync so we show data synced by cron (server-side) too.
   useEffect(() => {
     const refetchRuns = () => {
-      axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`)
+      axios.get(`${process.env.REACT_APP_API_URL}/api/runs/`, {
+        withCredentials: true,
+      })
         .then((res) => {
           setRuns(res.data);
           _checkAndStartWeatherPolling(res.data);
@@ -336,6 +344,7 @@ export default function RunList() {
         </Button>
       </div>
       <List
+        data-testid="run-record-list"
         pagination={{
           pageSize: 8,
           align: "center",
@@ -343,6 +352,7 @@ export default function RunList() {
         dataSource={runs}
         renderItem={(run) => (
           <Card
+            data-testid="run-record-card"
             hoverable
             onClick={() => {
               setSelectedRun(selectedRun?.id === run.id ? null : run);

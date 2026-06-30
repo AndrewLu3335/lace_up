@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import path
+from strava.models import StravaProfile
 
 from .test_auth import e2e_login
 
@@ -79,6 +80,13 @@ class E2ELoginTests(TestCase):
         user = get_user_model().objects.get(username="e2e_runner")
         self.assertFalse(user.has_usable_password())
         self.assertEqual(self.client.session["_auth_user_id"], str(user.pk))
+        profile = StravaProfile.objects.filter(user=user).first()
+        self.assertIsNotNone(profile)
+        self.assertEqual(profile.strava_id, -user.pk)
+        self.assertEqual(profile.strava_username, user.username)
+        self.assertEqual(profile.access_token, "")
+        self.assertEqual(profile.refresh_token, "")
+        self.assertEqual(profile.expires_at, 0)
 
     def test_reuses_an_existing_e2e_user(self):
         """Reuse an existing test user without creating a duplicate account."""
