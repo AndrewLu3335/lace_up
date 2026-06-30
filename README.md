@@ -54,6 +54,8 @@ The normal `compose.dev.yaml` configuration keeps the endpoint disabled.
 
 ## Docs
 
+Local agent planning artifacts are excluded from version control.
+
 - **`DEPLOYMENT.md`** — production setup, `.env` variables, CORS/CSRF, build & Gunicorn
 - `backend/CRON_SETUP_GUIDE.md` — cron examples for sync and weather jobs
 - `backend/POLLING_SETUP.md` — frontend vs backend polling
