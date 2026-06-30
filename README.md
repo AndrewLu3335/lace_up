@@ -34,6 +34,24 @@ npm start
 
 Create an app at [Strava API settings](https://www.strava.com/settings/api). Set **Authorization Callback Domain** and redirect URI to match `BACKEND_URL` (e.g. `http://localhost:8000/api/strava/callback/`).
 
+## Local E2E Test Authentication
+
+The local Docker environment provides an opt-in session bootstrap endpoint for automated API and UI tests:
+
+```http
+POST /api/test/login/
+```
+
+The endpoint creates or reuses a user whose username begins with `e2e_`. It is registered only when Django debug mode and `ENABLE_E2E_TEST_AUTH` are both enabled, and it accepts no password, OAuth token, or Strava credential.
+
+Start the backend with local E2E authentication:
+
+```bash
+docker compose -f compose.dev.yaml -f compose.e2e.yaml up -d db backend
+```
+
+The normal `compose.dev.yaml` configuration keeps the endpoint disabled.
+
 ## Docs
 
 - **`DEPLOYMENT.md`** — production setup, `.env` variables, CORS/CSRF, build & Gunicorn

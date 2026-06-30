@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 @csrf_exempt
 @require_POST
 def e2e_login(request):
+    """Create or reuse a local E2E user and attach an authenticated session."""
     if not settings.ENABLE_E2E_TEST_AUTH:
         raise Http404
 
